@@ -1,0 +1,12 @@
+{
+  "port": 1881,
+  "serial_host": "/dev/ttyPS0",
+  "serial_bps": 115200,
+  "model_dir": "D:\\Desktop\\run\\workspace\\model",
+  "input_frame_size": [
+    128,
+    128
+  ],
+  "host": "192.168.154.240",
+  "server": "http://192.168.154.240:1881"
+}
