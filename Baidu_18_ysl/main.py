@@ -7,29 +7,28 @@ from utils import Timeit,Timety,Timer
 from utils import getime,sprint,set_all_gpio,mmap,check_cap
 from detection import detection_init,predict,drawResults
 
-h,w=310,250
+h,w=128,128 # read json and assrt 32
 ser=Serial_init("/dev/ttyPS0",115200,0.5)
 log_dir='log/'+getime()
 os.mkdir(log_dir)
-logger_gpio=Fplog(os.path.join(log_dir,'gpio.txt'),ser=None)
-logger_results=Fplog(os.path.join(log_dir,'results.txt'),ser=ser)
+logger_gpio=    Fplog(os.path.join(log_dir,'gpio.txt'),ser=None)
+logger_results= Fplog(os.path.join(log_dir,'results.txt'),ser=ser)
 logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'),ser=None)
 logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'),ser=None)
-
 
 try:
     T=time.time()
     timeit=Timeit('Initialization')
     
     cap1 = cv2.VideoCapture('/dev/video0',cv2.CAP_V4L) # front camera
-    #cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L) # left  camera
-    #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # right camera
-    caplist=[cap1]
+    cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L) # left  camera
+    cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # right camera
+    caplist=[cap1,cap2,cap3]
     mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w])
     mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
 
     global MODEL_CONFIG,PREDICTOR,DISPLAYER
-    DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init("../test/face_model/usb_yolov3.json",)
+    DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init("../test/face_model/usb_yolov3.json")
     classes=MODEL_CONFIG.labels
 
     @Timety(timer=None,ser=None,logger=logger_modelrun,T=T)
@@ -46,12 +45,11 @@ try:
     @Timety(timer=None,ser=None,logger=logger_modelrun,T=T)
     def SegmentationRoad(cap):
         # TODO
-        _,frame=cap.read()
         return 'line_info'
 
     timeit.out('Mainloop',logger=logger_modelrun,T=T)
 
-    timer_predict=Timer(0.01)# 0.12
+    timer_predict=Timer(0.05)# 0.12
     timer_loop=Timer(0.01)# 0.12
 
     _=1
@@ -70,19 +68,9 @@ try:
         if timer_predict.T():   
 
             if switch:
-                cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L)
-                mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_WIDTH, w])
-                mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
-                check_cap([cap2],T=T)
                 result_l=PredictFrame(cap2)
-                cap2.release()
-            
-                cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L)
-                mmap('set',[cap3],arg=[cv2.CAP_PROP_FRAME_WIDTH, w])
-                mmap('set',[cap3],arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
-                check_cap([cap3],T=T)
+            else:
                 result_r=PredictFrame(cap3)
-                cap3.release()
 
             if _:
                 sprint('start',T=T,ser=ser,logger=logger_results)
@@ -105,7 +93,6 @@ except:
     timeit.out('end',logger=logger_modelrun,T=T)  
     logger_results.add('{:.2f} : Error raised'.format(time.time()-T))
     logger_results.add(traceback.format_exc())
-    print(traceback.print_exc())
 
 finally:
     mmap('release',caplist)
