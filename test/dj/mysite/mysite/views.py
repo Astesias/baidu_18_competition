@@ -37,11 +37,8 @@ T=None
 Q=Queue(maxsize=5)
 Q2=Queue(maxsize=2)
 
-
 def wifi(request):
-    context          = {}
-    context['hello'] = 'WIFI!'
-    return render(request, 'log.html', context)
+    return render(request, 'log.html',{})
 
 def data(request):
 
