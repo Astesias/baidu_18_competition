@@ -8,7 +8,10 @@ def pcs_tasker():
     from pysl import cmd
     
     print(f'runserver in: http://{getip()[0]}:1881')
-    cmd('python manage.py runserver 0.0.0.0:1881')
+    try:
+        cmd('python3 manage.py runserver 0.0.0.0:1881')
+    except:
+        cmd('python manage.py runserver 0.0.0.0:1881')
 
 
 def write():
