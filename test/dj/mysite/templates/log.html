@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Eblog</title>
+        <meta charset="utf-8">
+        <style>
+            div{
+                font: 2em bold;
+                height: fit-content;
+                text-align:center;
+            }
+        </style>
+        <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script>
+        
+            function print(arg){
+                console.log(arg);
+            }
+        
+            String.format = function() {
+                if (arguments.length == 0)
+                    return null;
+                var str = arguments[0];
+                for ( var i = 1; i < arguments.length; i++) {
+                    var re = new RegExp('\\{' + (i - 1) + '\\}', 'gm');
+                    str = str.replace(re, arguments[i]);
+                }
+                return str;
+            }
+        
+            var maxlength_=5
+            var maxlength=5;
+            var getdata=null
+
+            function ADD(){
+                list=$("#list");
+        
+                var varitem= "<div id={0}>{1}<br></br></div>"
+
+                $.get('/data'+ Date.now(),{},
+                            function(data){
+                                if (data!='Nodata')
+                                    getdata=data
+                                else
+                                    getdata=null
+                            })
+                if (getdata==null || getdata=='NoData')
+                        return
+
+                var fmtitem= String.format(varitem,maxlength,getdata)
+        
+                list.append(fmtitem);
+                maxlength--;
+            
+                if (maxlength<0){
+                    var rmitem= String.format("#{0}",maxlength+maxlength_+1)
+                    $(rmitem).remove()
+                }
+
+                
+            
+        
+                <!-- $("#list").append(fmtitem); -->
+           }
+        
+           setInterval(ADD, 1000);//间隔一秒不断循环刷新;
+        </script>
+
+    </head>
+    <body> 
+        <div>Logs</div>
+        <br>    
+        <ol id="list">    
+        </ol>
+    </body>
+</html>

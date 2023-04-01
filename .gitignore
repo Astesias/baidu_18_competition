@@ -1,0 +1,12 @@
+backup/
+Demoes
+driver
+lost*
+*.txt
+
+__pycache__
+log/
+flask_*
+output/
+
+face_model
