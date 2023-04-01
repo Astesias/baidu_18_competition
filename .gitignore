@@ -10,3 +10,6 @@ flask_*
 output/
 
 face_model
+FZ*
+
+.vscode
