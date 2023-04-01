@@ -1,4 +1,4 @@
-import time
+import time,os
 from pysl import easy_request,getip
 from threading import Thread as thd
 from multiprocessing import Process as pcs
@@ -8,9 +8,9 @@ def pcs_tasker():
     from pysl import cmd
     
     print(f'runserver in: http://{getip()[0]}:1881')
-    try:
+    if os.name!='nt':
         cmd('python3 manage.py runserver 0.0.0.0:1881')
-    except:
+    else:
         cmd('python manage.py runserver 0.0.0.0:1881')
 
 
