@@ -9,7 +9,7 @@ from utils import Timeit,Timety,Timer
 from utils import getime,sprint,set_all_gpio,mmap,check_cap
 from detection import detection_init,predict,drawResults
 
-h,w=128,128 # read json and assrt 32
+h,w=128,128 # read json and assrt 32            
 ser=Serial_init("/dev/ttyPS0",115200,0.5)
 log_dir='log/'+getime()
 os.mkdir(log_dir)

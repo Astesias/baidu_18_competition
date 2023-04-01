@@ -17,15 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import re_path
-from django.conf.urls.static import static
-from django.conf import settings
 
 from . import views
 
 urlpatterns = [
     path('index/', admin.site.urls),
     path('wifi/', views.wifi),
-    re_path(r'^data.*$', views.data),
-    path('order/', views.order),
-    path('', views.wifi),
-]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    re_path(r'^data.+/$', views.data),
+]

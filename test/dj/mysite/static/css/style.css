@@ -1,0 +1,121 @@
+.log{
+    font: 1.1em Sans-serif bold;
+    /* background-color: aqua; */
+    color: rgba(209, 11, 244, 0.819);
+    height: fit-content;
+    width: fit-content;
+    padding-right: 3%;
+    padding-top: 5%;
+    padding-left: 3%;
+    margin:0%;
+}
+
+.log-title{
+    font-size: 1.3em;
+    color:whitesmoke;
+    background-color: black;
+    width: unset;
+    height: unset;
+    text-align: center;
+    padding-top: unset;
+}
+
+#list-d {
+
+    position: fixed;
+    height: 20%;
+    width: 30%;
+    overflow-y:auto;
+    background-color: aliceblue;
+    padding-left: 0%;
+    margin:0%;
+
+    top:5%;
+    left: 5%;
+
+}
+
+#list-s {
+    position: fixed;
+    height: 20%;
+    width: 30%;
+    overflow-y:auto;
+    background-color: aliceblue;
+    padding-left: 0%;
+    margin:0%;
+
+    top: 5%;
+    right: 5%
+}
+
+#list-o {
+    margin: 0%;
+    position: fixed;
+    width: 4.5%;
+    height: 2%;
+    padding-bottom: 2.3%;
+    color: deeppink;
+    background-color: gold;
+
+    padding-left: 1%;
+    padding-right: 1%;
+    padding-top: 1.2%;
+    padding-bottom: 0.2%;
+    top: 6%;
+    left:47%;
+    text-align: center;
+}
+
+
+
+#order {
+    /* position:fixed; */
+    right: 10%;
+    top: 0%
+}
+
+
+.bt-r1{
+    left:42%
+}
+
+.bt-r2{
+    left:48%
+}
+
+.bt-r3{
+    left: 54%
+}
+
+.bt-l1{
+    top:10%;
+}
+
+.bt-l2{
+    top:15%;
+}
+
+.bt-l3{
+    top:20%;
+}
+
+/* General Buttons */
+button {
+    margin: 0%;
+    position: fixed;
+    width: fit-content;
+    height: fit-content;
+    padding-bottom: 2.3%;
+    color: deeppink;
+    background-color: aliceblue;
+    padding-top: 2.3%;
+    text-align: center;
+}
+
+button:active{
+    background-color: darkorange;
+}
+
+
+
+

@@ -1,76 +1,37 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Eblog</title>
+        <title>Edgeboard网络上位机</title>
         <meta charset="utf-8">
-        <style>
-            div{
-                font: 2em bold;
-                height: fit-content;
-                text-align:center;
-            }
-        </style>
+        
+        <link rel="stylesheet" href="../static/css/style.css" >
         <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-        <script>
-        
-            function print(arg){
-                console.log(arg);
-            }
-        
-            String.format = function() {
-                if (arguments.length == 0)
-                    return null;
-                var str = arguments[0];
-                for ( var i = 1; i < arguments.length; i++) {
-                    var re = new RegExp('\\{' + (i - 1) + '\\}', 'gm');
-                    str = str.replace(re, arguments[i]);
-                }
-                return str;
-            }
-        
-            var maxlength_=5
-            var maxlength=5;
-            var getdata=null
-
-            function ADD(){
-                list=$("#list");
-        
-                var varitem= "<div id={0}>{1}<br></br></div>"
-
-                $.get('/data'+ Date.now(),{},
-                            function(data){
-                                if (data!='Nodata')
-                                    getdata=data
-                                else
-                                    getdata=null
-                            })
-                if (getdata==null || getdata=='NoData')
-                        return
-
-                var fmtitem= String.format(varitem,maxlength,getdata)
-        
-                list.append(fmtitem);
-                maxlength--;
-            
-                if (maxlength<0){
-                    var rmitem= String.format("#{0}",maxlength+maxlength_+1)
-                    $(rmitem).remove()
-                }
-
-                
-            
-        
-                <!-- $("#list").append(fmtitem); -->
-           }
-        
-           setInterval(ADD, 1000);//间隔一秒不断循环刷新;
-        </script>
-
+        <script src="../static/js/core.js"></script>
     </head>
+
     <body> 
-        <div>Logs</div>
-        <br>    
-        <ol id="list">    
+        
+        <ol id="list-d">
+            <div class="log log-title">Detection Logs</div>
         </ol>
+        <ol id="list-s">
+            <div class="log log-title">Segmention Logs</div>
+        </ol>
+        <ol id="list-o" class="bt-r2">orders</ol> 
+        <button class="bt-r1 bt-l1 site" onclick="button(1)">按钮1</button>
+        <button class="bt-r2 bt-l1 site" onclick="button(2)">按钮2</button>
+        <button class="bt-r3 bt-l1 site" onclick="button(3)">按钮3</button>
+        <button class="bt-r1 bt-l2 site" onclick="button(4)"">按钮4</button>
+        <button class="bt-r2 bt-l2 site" onclick="button(5)"">按钮5</button>
+        <button class="bt-r3 bt-l2 site" onclick="button(6)"">按钮6</button>
+        <button class="bt-r1 bt-l3 site" onclick="button(7)"">按钮7</button>
+        <button class="bt-r2 bt-l3 site" onclick="button(8)"">按钮8</button>
+        <button class="bt-r3 bt-l3 site" onclick="button(9)"">按钮9</button>
+   
+
     </body>
+
+
 </html>
