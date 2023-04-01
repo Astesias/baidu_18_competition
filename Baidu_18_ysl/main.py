@@ -1,3 +1,5 @@
+# -*- coding:utf-8 ±àÂë²âÊÔ
+
 import os
 import cv2
 import time
