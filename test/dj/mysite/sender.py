@@ -21,7 +21,7 @@ def write():
         time.sleep(1)
         msg = str(i)
         print(msg, '------------')
-        easy_request('http://192.168.111.240:1881/data', method='POST',
+        easy_request(f'http://{getip()[0]}:1881/data', method='POST',
                      data={'msg': msg},
                      header={"Content-type": "application/json"}
                      )
