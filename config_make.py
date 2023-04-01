@@ -6,7 +6,9 @@ config = {
     'serial_host': "/dev/ttyPS0",
     'serial_bps': 115200,
     'model_dir': os.path.abspath('./model'),
+    'model_json':'usb_yolov3.json',
     'input_frame_size': (128, 128),
+
 }
 
 
@@ -22,3 +24,4 @@ with Config('./configs.json', base=config) as cfg:
 
     cfg.add('host', getip()[0])
     cfg.add('server', f'http://{getip()[0]}:'+str(cfg.port))
+    cfg.add('model_json', os.path.join(cfg.model_dir,config['model_json']))

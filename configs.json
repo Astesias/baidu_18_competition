@@ -8,5 +8,6 @@
     128
   ],
   "host": "192.168.154.240",
-  "server": "http://192.168.154.240:1881"
+  "server": "http://192.168.154.240:1881",
+  "model_json": "D:\\Desktop\\run\\workspace\\model\\usb_yolov3.json"
 }
