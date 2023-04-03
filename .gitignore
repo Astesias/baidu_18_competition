@@ -13,3 +13,8 @@ face_model
 FZ*
 
 .vscode
+
+edgeboard/
+serial
+.vscode
+
