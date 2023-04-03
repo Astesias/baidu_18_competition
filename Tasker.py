@@ -3,7 +3,7 @@ from multiprocessing import Queue
 from pysl import Config,os_enter,easy_request
 import os,config_make,time
 
-Q_Order=Queue()
+Q_Order=Queue(maxsize=5)
 config_make.make_cfg()
 
 cfg=Config('./configs.json')
@@ -24,10 +24,12 @@ def get_order(Q_Order,server):
     time.sleep(2)
     while 1:
         time.sleep(1)
-        order=easy_request(server+'/order')
+        order=easy_request(server+'/order/')
         if order!='NoData':
             Q_Order.put(order)
-            # print(order,'-----------------')
+            if Q_Order.qsize()==5:
+                Q_Order.get()
+            print(order,'-----------------')
 
 def main_tasker():
     pass
