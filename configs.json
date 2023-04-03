@@ -2,14 +2,14 @@
   "port": 1881,
   "serial_host": "/dev/ttyPS0",
   "serial_bps": 115200,
-  "model_dir": "/root/workspace/.test/face_model",
+  "model_dir": "D:\\Desktop\\run\\workspace\\.test\\face_model",
   "input_frame_size": [
     128,
     128
   ],
-  "host": "192.168.36.121",
-  "server": "http://192.168.36.121:1881",
-  "model_json": "/root/workspace/.test/face_model/usb_yolov3.json",
-  "server_task": "/root/workspace/test/dj/mysite/sender.py",
-  "main_task": "/root/workspace/Baidu_18_ysl/main.py"
+  "host": "192.168.36.240",
+  "server": "http://192.168.36.240:1881",
+  "model_json": "D:\\Desktop\\run\\workspace\\.test\\face_model\\usb_yolov3.json",
+  "server_task": "D:\\Desktop\\run\\workspace\\test\\dj\\mysite\\sender.py",
+  "main_task": "D:\\Desktop\\run\\workspace\\Baidu_18_ysl\\main.py"
 }
