@@ -7,7 +7,7 @@ from pysl import Config,truepath
 from utils import Serial_init,Fplog
 from utils import Timeit,Timety,Timer
 from utils import getime,sprint,set_all_gpio,mmap,check_cap
-# from detection import detection_init,predict,drawResults
+from detection import detection_init,predict,drawResults
 
 def run(Q_order,cfg):
 
