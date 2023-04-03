@@ -118,3 +118,6 @@ if __name__=='__main__':
 
     print(Config(truepath(__file__,'../configs.json')).data)
     # run(Q(),Config('../configs.json').data)
+
+
+    
