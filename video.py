@@ -32,6 +32,8 @@ def get_order(Q_Order,server):
             print(order,'-----------------')
 
 def main_tasker(Q_Order):
+    import time 
+    time.sleep(3)
     import cv2
     from pysl import getime
 
@@ -46,16 +48,18 @@ def main_tasker(Q_Order):
     fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
 
     writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
+    print('start',cap.isOpened())
     while cap.isOpened():
         _, frame = cap.read() 
         writer.write(frame)  
 
-        if Q_Order.qsize() and Q_Order.get()=='9':
+        if Q_Order.qsize() and int(Q_Order.get())==9:
             break
 
     cap.release()      
     writer.release()  
     cv2.destroyAllWindows() 
+    print('done')
         
 
 if __name__=='__main__':
