@@ -1,17 +1,17 @@
-import time,os
+import time,os,sys
 from pysl import easy_request,getip
 from threading import Thread as thd
 from multiprocessing import Process as pcs
 
 
-def pcs_tasker():
+def pcs_tasker(port):
     from pysl import cmd
     
-    print(f'runserver in: http://{getip()[0]}:1881')
+    
     if os.name!='nt':
-        cmd('python3 manage.py runserver 0.0.0.0:1881')
+        cmd(f'python3 manage.py runserver 0.0.0.0:{port}')
     else:
-        cmd('python manage.py runserver 0.0.0.0:1881')
+        cmd(f'python manage.py runserver 0.0.0.0:{port}')
 
 
 def write():
@@ -29,5 +29,8 @@ def write():
 
 
 if __name__ == '__main__':
-    thd(target=write).start()
-    pcs(target=pcs_tasker).start()
+    if len(sys.argv)==1:
+        thd(target=write).start()
+        pcs(target=pcs_tasker).start()
+    else:
+        pcs(target=pcs_tasker,args=sys.argv[1:]).start()
