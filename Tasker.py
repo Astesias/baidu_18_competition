@@ -31,7 +31,7 @@ def get_order(Q_Order,server):
                 Q_Order.get()
             print(order,'-----------------')
 
-def main_tasker():
+def main_tasker(Q_Order):
     with os_enter() as oe:
         oe.cd('Badui_18_ysl')
         

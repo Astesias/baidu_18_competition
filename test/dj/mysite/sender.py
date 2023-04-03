@@ -6,8 +6,7 @@ from multiprocessing import Process as pcs
 
 def pcs_tasker(port):
     from pysl import cmd
-    
-    
+
     if os.name!='nt':
         cmd(f'python3 manage.py runserver 0.0.0.0:{port}')
     else:
