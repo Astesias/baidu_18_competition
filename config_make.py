@@ -29,6 +29,11 @@ def make_cfg():
 
         cfg.add('server_task', os.path.abspath(config.get('server_task')))
         cfg.add('main_task', os.path.abspath(config.get('main_task')))
+        
+        try:
+          cfg.add('videos',[i for i in os.listdir('/dev') if 'video' in i])
+        except:
+          pass
 
     return cfg
 
