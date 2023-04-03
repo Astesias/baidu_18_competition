@@ -13,7 +13,7 @@ def server_tasker(server,port):
 
     print(f'Django server on {server}')
 
-    with os_enter() as oe:
+    with os_enter('./') as oe:
         oe.cd('test/dj/mysite')
         if os.name=='nt':
             oe.cmd(f'python manage.py runserver 0.0.0.0:{port}')

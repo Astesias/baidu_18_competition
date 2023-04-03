@@ -13,7 +13,7 @@ def server_tasker(server,port):
 
     print(f'Django server on {server}')
 
-    with os_enter() as oe:
+    with os_enter('./') as oe:
         oe.cd('test/dj/mysite')
         if os.name=='nt':
             oe.cmd(f'python manage.py runserver 0.0.0.0:{port}')
@@ -37,8 +37,8 @@ def main_tasker(Q_Order):
     import cv2
     from pysl import getime
 
-    n='/dev/video0'
-    path=f'./output/{getime()}.mp4'
+    n='/dev/video2'
+    path=f'./output/{getime(1)}.mp4'
 
     cap=cv2.VideoCapture(n,cv2.CAP_V4L)     
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
