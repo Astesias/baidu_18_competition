@@ -51,6 +51,9 @@ def main_tasker(Q_Order):
 
     while not Q_Order.qsize():
         pass
+    if not Q_Order.get()=='start':
+        print('not start , return')
+        return
     print('start',cap.isOpened())
     while cap.isOpened():
         _, frame = cap.read() 
