@@ -4,10 +4,12 @@ import cv2
 import time
 import traceback
 from pysl import Config,truepath
-from utils import Serial_init,Fplog
-from utils import Timeit,Timety,Timer
-from utils import getime,sprint,set_all_gpio,mmap,check_cap
-from detection import detection_init,predict,drawResults
+
+if os.name!='nt':
+    from utils import Serial_init,Fplog
+    from utils import Timeit,Timety,Timer
+    from utils import getime,sprint,set_all_gpio,mmap,check_cap
+    from detection import detection_init,predict,drawResults
 
 def run(Q_order,cfg):
 
@@ -110,14 +112,10 @@ def run(Q_order,cfg):
         mmap('close',[logger_gpio,logger_looptime,logger_modelrun,logger_results])
 
 
-
 if __name__=='__main__':
-    class Q:
-        def get():
-            pass
 
     print(Config(truepath(__file__,'../configs.json')).data)
-    # run(Q(),Config('../configs.json').data)
 
+    if os.name!='nt':
+        run(Q(),Config('../configs.json').data)
 
-    
