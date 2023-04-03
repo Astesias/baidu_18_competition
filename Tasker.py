@@ -32,10 +32,14 @@ def get_order(Q_Order,server):
             print(order,'-----------------')
 
 def main_tasker():
-    pass
+    with os_enter() as oe:
+        oe.cd('Badui_18_ysl')
+        
+
 
 
 if __name__=='__main__':
     pcs(target=server_tasker,args=[server,port]).start()
     pcs(target=get_order,args=[Q_Order,server]).start()
+    pcs(target=main_tasker,args=[Q_Order]).start()
     

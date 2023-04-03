@@ -6,7 +6,7 @@ def make_cfg():
         'port': 1881,
         'serial_host': "/dev/ttyPS0",
         'serial_bps': 115200,
-        'model_dir': os.path.abspath('./model'),
+        'model_dir': os.path.abspath('.test/face_model'),
         'model_json': 'usb_yolov3.json',
         'input_frame_size': (128, 128),
         'server_task': './test/dj/mysite/sender.py',

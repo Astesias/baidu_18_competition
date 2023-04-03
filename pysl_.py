@@ -277,9 +277,8 @@ class dir_enter:
         print()
 
 class os_enter:
-    def __init__(self, dir_=None):
-        if not dir_:
-            dir_ = truepath(__file__)
+    def __init__(self, dir_):
+        dir_ = truepath(dir_)
         self.dir=self.odir= dir_
 
     def __enter__(self):
@@ -290,6 +289,9 @@ class os_enter:
 
     def _lisdir(self):
         return os.listdir(self.dir)
+
+    def file(self, name):
+        return os.path.join(self.dir, name)
 
     def md(self, path):
         try:
@@ -1918,8 +1920,8 @@ if os.name=='nt':
     pysl_lib = 'D:\Anconda\Lib\site-packages'
 else:
     pysl_lib = '/usr/lib/python3/dist-packages/'
-
-
+    
+    
 if __name__ == 'pysl':
     pysl_including = True
     current_time = getime()
