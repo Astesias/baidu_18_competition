@@ -18,6 +18,12 @@ function button(index){
         case 1:
             order='start'
             break
+        case 2:
+            order='update'
+            break
+        case 9:
+            order='stop'
+            break
         default:
             order=index
 

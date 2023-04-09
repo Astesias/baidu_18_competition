@@ -37,35 +37,41 @@ def main_tasker(Q_Order):
     import cv2
     from pysl import getime
 
-    n='/dev/video2'
-    path=f'./output/{getime(1)}.mp4'
+    while 1:
+        n='/dev/video2'
+        path=f'./output/{getime(1)}.mp4'
 
-    cap=cv2.VideoCapture(n,cv2.CAP_V4L)     
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) 
-    fps = cap.get(cv2.CAP_PROP_FPS) 
-    fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))  
-    fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
+        cap=cv2.VideoCapture(n,cv2.CAP_V4L)     
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) 
+        fps = cap.get(cv2.CAP_PROP_FPS) 
+        fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))  
+        fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
 
-    writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
+        writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
 
-    while not Q_Order.qsize():
-        pass
-    if not Q_Order.get()=='start':
-        print('not start , return')
-        return
-    print('start',cap.isOpened())
-    while cap.isOpened():
-        _, frame = cap.read() 
-        writer.write(frame)  
+        while not Q_Order.qsize():
+            print(type(Q_Order.get()))
+            pass
+        if not Q_Order.get()!=1:
+            print(type(Q_Order.get()))
+            print('not start , return')
+            return
+        
+        print('start',cap.isOpened())
+        while cap.isOpened():
+            _, frame = cap.read() 
+            writer.write(frame)  
+            
+            # if Q_Order.qsize():
+  
+            #     if 
+            #     break
 
-        if Q_Order.qsize() and int(Q_Order.get())==9:
-            break
-
-    cap.release()      
-    writer.release()  
-    cv2.destroyAllWindows() 
-    print('done')
+        cap.release()      
+        writer.release()  
+        cv2.destroyAllWindows() 
+        print('done')
         
 
 if __name__=='__main__':
