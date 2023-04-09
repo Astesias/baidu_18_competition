@@ -1,7 +1,7 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
 from pysl import Config,os_enter,easy_request
-import os,config_make,time
+import os,config_make,time,cv2
 
 Q_Order=Queue(maxsize=5)
 config_make.make_cfg()
@@ -51,28 +51,35 @@ def main_tasker(Q_Order):
         writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
 
         while not Q_Order.qsize():
-            print(type(Q_Order.get()))
             pass
         if not Q_Order.get()!=1:
-            print(type(Q_Order.get()))
             print('not start , return')
             return
-        
-        print('start',cap.isOpened())
+        else:
+            print('start',cap.isOpened())
+
         while cap.isOpened():
             _, frame = cap.read() 
             writer.write(frame)  
             
-            # if Q_Order.qsize():
-  
-            #     if 
-            #     break
+            if Q_Order.qsize():
+                order=Q_Order.get()
+                if order=='9':
+                    break
+                elif order=='2':
+                    framewrite(frame,'./test/dj/mysite/static/')
+
+
 
         cap.release()      
         writer.release()  
         cv2.destroyAllWindows() 
         print('done')
         
+def framewrite(frame,path):
+    cv2.imwrite(path,frame)
+
+
 
 if __name__=='__main__':
     pcs(target=server_tasker,args=[server,port]).start()

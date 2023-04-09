@@ -27,7 +27,7 @@ def imagecapture(n,path,vt=10):
           f-=1
         else:
             break
-        cv2.imwrite(os.path.join(path,'{}.jpg'.format('_'.join(time.ctime(time.time()).split(' ')[3:5]),frame)
+        cv2.imwrite(os.path.join(path,'{}.jpg'.format('_'.join(time.ctime(time.time()).split(' ')[3:5]),frame)))
         r.update(vt-f,new=' p')
         
     cap.release()      
