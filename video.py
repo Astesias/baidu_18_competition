@@ -1,6 +1,6 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
-from pysl import Config,os_enter,easy_request
+from pysl import Config,os_enter,easy_request,cmd
 import os,config_make,time,cv2
 
 Q_Order=Queue(maxsize=5)
@@ -69,8 +69,9 @@ def main_tasker(Q_Order):
                 if order=='9':
                     break
                 elif order=='2':
+                    cmd('rm ./test/dj/mysite/static/img/tmp.jpg')
                     framewrite(frame,'./test/dj/mysite/static/img/tmp.jpg')
-
+        
 
 
         cap.release()      
