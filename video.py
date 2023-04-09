@@ -69,7 +69,7 @@ def main_tasker(Q_Order):
                 if order=='9':
                     break
                 elif order=='2':
-                    framewrite(frame,'./test/dj/mysite/static/tmp.jpg')
+                    framewrite(frame,'./test/dj/mysite/static/img/tmp.jpg')
 
 
 
