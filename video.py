@@ -48,14 +48,16 @@ def main_tasker(Q_Order):
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))  
         fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
 
-        writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
+        
 
         while not Q_Order.qsize():
             pass
-        if not Q_Order.get()!=1:
+        if not Q_Order.get()!='1':
             print('not start , return')
             return
         else:
+            writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
+            time.sleep(1)
             print('start',cap.isOpened())
 
         while cap.isOpened():
