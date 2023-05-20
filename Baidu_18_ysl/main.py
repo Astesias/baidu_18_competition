@@ -2,8 +2,10 @@
 import os
 import cv2
 import time
+import pprint
 import traceback
 from pysl import Config,truepath
+from mask2angle import core
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
@@ -56,8 +58,9 @@ def run(Q_order,cfg):
 
         @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
         def SegmentationRoad(cap):
-            # TODO
-            return 'line_info'
+            _,frame=cap.read()
+            angle=core(frame)
+            return '{:.2f}'.format(angle)
 
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
@@ -78,19 +81,19 @@ def run(Q_order,cfg):
                 line_info=SegmentationRoad(cap1)
                 sprint(line_info,T=T,ser=ser,logger=logger_results)
 
-            if timer_predict.T():   
+            # if timer_predict.T():   
 
-                if switch:
-                    result_l=PredictFrame(cap2)
-                else:
-                    result_r=PredictFrame(cap3)
+            #     if switch:
+            #         result_l=PredictFrame(cap2)
+            #     else:
+            #         result_r=PredictFrame(cap3)
 
-                if Start:
-                    sprint('start',T=T,ser=ser,logger=logger_results)
-                    Start=False
-                else:
-                    sprint('result_l: {} ==== result_r: {}'.format(result_l,result_r),
-                            T=T,ser=ser,logger=logger_results)
+            #     if Start:
+            #         sprint('start',T=T,ser=ser,logger=logger_results)
+            #         Start=False
+            #     else:
+            #         sprint('result_l: {} ==== result_r: {}'.format(result_l,result_r),
+            #                 T=T,ser=ser,logger=logger_results)
 
                 #switch=not switch
                 #set_all_gpio('111111',normal=False,ser=None,logger=logger_gpio) # low speed
@@ -114,7 +117,7 @@ def run(Q_order,cfg):
 
 if __name__=='__main__':
 
-    print(Config(truepath(__file__,'../configs.json')).data)
+    pprint(Config(truepath(__file__,'../configs.json')).data)
 
     if os.name!='nt':
         run(Q(),Config(truepath(__file__,'../configs.json')).data)
