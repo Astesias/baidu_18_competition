@@ -19,3 +19,7 @@ serial
 .vscode
 
 configs.json
+
+.ignore/
+
+EBM/

@@ -39,14 +39,14 @@ def main_tasker(Q_Order):
 
     while 1:
         n='/dev/video0'
-        path=f'./output/{getime(1)}.mp4'
+        path=f'./output/{getime(1)}.avi'
 
         cap=cv2.VideoCapture(n,cv2.CAP_V4L)     
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) 
         fps = cap.get(cv2.CAP_PROP_FPS) 
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))  
-        fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
         
 
