@@ -2,7 +2,6 @@
 import os
 import cv2
 import time
-import pprint
 import traceback
 from pysl import Config,truepath
 from mask2angle import core
@@ -10,7 +9,7 @@ from mask2angle import core
 if os.name!='nt':
     from utils import Serial_init,Fplog
     from utils import Timeit,Timety,Timer
-    from utils import getime,sprint,set_all_gpio,mmap,check_cap
+    from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
 def run(Q_order,cfg):
@@ -26,7 +25,7 @@ def run(Q_order,cfg):
     os.mkdir(log_dir)
 
     logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'),ser=None)        # gpio输出
-    logger_results =Fplog(os.path.join(log_dir,'results.txt'),ser=ser)      # 预测结果输出
+    logger_results =Fplog(os.path.join(log_dir,'results.txt'),ser=None)      # 预测结果输出
     logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'),ser=None)    # 循环计时
     logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'),ser=None)    # 模型运行
 
@@ -35,15 +34,15 @@ def run(Q_order,cfg):
         timeit=Timeit('Initialization') # 开始初始化
         
         cap1 = cv2.VideoCapture('/dev/video0',cv2.CAP_V4L) # 前摄像头
-        cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L) # 左摄像头
-        cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
-        caplist=[cap1,cap2,cap3]
+        #cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L) # 左摄像头
+        #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
+        caplist=[cap1,]#cap2,cap3]
         mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
         mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
-        DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init(cfg['model_json'])
-        classes=MODEL_CONFIG.labels
+        DISPLAYER,MODEL_CONFIG,PREDICTOR=[None,None,None]#detection_init(cfg['model_json'])
+        classes=None#MODEL_CONFIG.labels
 
         @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 目标检测
         def PredictFrame(cap,display=True):
@@ -56,16 +55,20 @@ def run(Q_order,cfg):
                 DISPLAYER.putFrame(frame)
             return mmap('unpack',result,arg=[MODEL_CONFIG.labels])
 
-        @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
-        def SegmentationRoad(cap):
+        #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
+        def SegmentationRoad(cap,display=True):
             _,frame=cap.read()
             angle=core(frame)
+            if display:
+                display_angle(frame,angle)
+                cv2.waitKey(10)
+                
             return '{:.2f}'.format(angle)
 
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
         timer_predict=Timer(0.05) # 最多0.05s识别一次
-        timer_loop=Timer(0.01) # 循环log最多0.01输出一次
+        timer_loop=Timer(5) # 循环log最多10输出一次
 
         Start=True # 首次运行标志
         switch=True # 左右摄像头切换
@@ -77,9 +80,10 @@ def run(Q_order,cfg):
             t=time.time() # 循环开始计时
             loop_times+=1 
 
-            if not Start:
+            if Start:
                 line_info=SegmentationRoad(cap1)
-                sprint(line_info,T=T,ser=ser,logger=logger_results)
+                sprint(line_info,T=T,ser=None,logger=logger_results)
+                sprint(line_info,T=T,ser=ser,logger=None,end='\n\r')
 
             # if timer_predict.T():   
 
@@ -98,7 +102,7 @@ def run(Q_order,cfg):
                 #switch=not switch
                 #set_all_gpio('111111',normal=False,ser=None,logger=logger_gpio) # low speed
                 
-            if T-time.time()>(8*60): # 防死机
+            if time.time()-T>(60*5): # 防死机
                 raise TimeoutError
             
             if timer_loop.T():
@@ -117,8 +121,8 @@ def run(Q_order,cfg):
 
 if __name__=='__main__':
 
-    pprint(Config(truepath(__file__,'../configs.json')).data)
+    print(Config(truepath(__file__,'../configs.json')).data)
 
     if os.name!='nt':
-        run(Q(),Config(truepath(__file__,'../configs.json')).data)
-
+        #run(Q(),Config(truepath(__file__,'../configs.json')).data)
+        run(None,Config(truepath(__file__,'../configs.json')))
