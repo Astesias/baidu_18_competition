@@ -1,8 +1,10 @@
 import os
+import cv2
 import sys
 import time
 import subprocess
 from functools import wraps
+from numpy import sin,cos,pi
 
 class Fplog():
     def __init__(self,filename,ser=None):
@@ -86,6 +88,17 @@ def sprint(message='',ser=None,logger=None,normal=True,T=0,end='\n',sep=' '):
         logger.add('[{:.2f}s] : {}'.format(time.time()-T,message))
     if normal:
         print('[{:.2f}s] : {}'.format(time.time()-T,message),end=end,sep=sep)
+
+
+def display_angle(frame,angle):
+    midx,midy=int(frame.shape[1]/2),int(frame.shape[0]/2)
+    p1=int(midx-50*sin(angle/180*pi)),int(midy+50*cos(angle/180*pi))
+    p2=int(midx+50*sin(angle/180*pi)),int(midy-50*cos(angle/180*pi))
+    
+    cv2.line(frame,p2,p1,(255,255,0),4,3)
+    cv2.putText(frame,'{:^5.1f}'.format(abs(angle)),(midx+20,midy),
+                cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255) if angle>0 else (255,0,255))
+    cv2.imshow('SEG',frame)
 
 
 ##############################################  hardware tools
