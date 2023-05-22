@@ -61,7 +61,10 @@ def run(Q_order,cfg):
             angle=core(frame)
             if display:
                 display_angle(frame,angle)
+<<<<<<< HEAD
                 cv2.waitKey(10)
+=======
+>>>>>>> refs/remotes/origin/master
                 
             return '{:.2f}'.format(angle)
 

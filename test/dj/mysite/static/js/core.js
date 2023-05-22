@@ -70,4 +70,27 @@ function ADD(){
     }
 }
 
+
+
+var video = document.querySelector('video');
+
+navigator.getUserMedia = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia;
+
+if (navigator.getUserMedia) {
+  navigator.getUserMedia({audio: false, video: {deviceId: '/dev/video0'}},
+    function(stream) {
+      video.srcObject = stream;
+    },
+    function(err) {
+      console.log("Failed to get video stream " + err);
+    }
+  );
+}
+
+
+
+
+
 setInterval(ADD, 1000);
