@@ -24,6 +24,9 @@ function button(index){
         case 3:
             order='run'
             break
+        case 4:
+            order='exit'
+            break
         case 9:
             order='stop'
             break
