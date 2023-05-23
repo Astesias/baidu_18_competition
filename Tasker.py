@@ -36,7 +36,7 @@ def get_order(Q_Order,server):
                 return
             if Q_Order.qsize()==5:
                 Q_Order.get()
-                print('order num max')
+                print('Warning: order num max')
 
 def main_tasker(Q_Order,cfg):
     with os_enter() as oe:
