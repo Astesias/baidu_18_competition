@@ -1,4 +1,4 @@
-import cv2
+import cv2,os
 import numpy as np
 
 def linear_regression(x,y):
@@ -36,7 +36,13 @@ def core(img,resize=None,mask=None):
     mymask=np.zeros_like(mask)
     areas=np.array([])
     lrs=np.array([])
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE|cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    s= cv2.findContours(mask, cv2.RETR_TREE|cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if os.name!='nt':
+      contours=s[1]
+    else:
+      contours=s[0]
+    
     
     for i in range(len(contours)):
         cnt = contours[i]

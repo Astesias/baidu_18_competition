@@ -215,7 +215,7 @@ class Communication():
             except Exception as e:
                 print(e)
 
-def Serial_init(com="/dev/ttyPS0",bps=115200,timeout=0.5,**kw):
+def Serial_init(com="/dev/ttyPS1",bps=115200,timeout=0.5,**kw):
     return Communication(com,bps,timeout,**kw)
 
 # useless

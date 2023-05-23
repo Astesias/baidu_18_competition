@@ -86,16 +86,23 @@ class Communication():
         print(e)
 
 if __name__=='__main__':
-
+   import time
    Ret =False 
    print()
-   Engine1 = Communication("/dev/ttyPS0",115200,0.5)
+   Engine1 = Communication("/dev/ttyPS0",14400,5)
+   Engine1.Recive_data(1)
    if (Ret):
      print('\n')
      while 1:
-       s=input('input something to send: ')
+       s='Hello'
+       print('send',s)
        Engine1.Send_data((s+'\n').encode('utf8'))
-
+       
+       aa=Engine1.Read_Size(8)
+       if aa:
+         print(aa)
+       
+       time.sleep(1)
   
   
   

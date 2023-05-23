@@ -64,6 +64,7 @@ def run(Q_order,cfg):
             angle=core(frame)
             if display:
                 display_angle(frame,angle)
+                cv2.waitKey(10)
                 
             return '{:.2f}'.format(angle)
 
