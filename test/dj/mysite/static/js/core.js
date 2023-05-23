@@ -21,6 +21,9 @@ function button(index){
         case 2:
             order='update'
             break
+        case 3:
+            order='run'
+            break
         case 9:
             order='stop'
             break
@@ -68,25 +71,6 @@ function ADD(){
         var rmitem= String.format("#{0}",maxlength+maxlength_+1)
         $(rmitem).remove()
     }
-}
-
-
-
-var video = document.querySelector('video');
-
-navigator.getUserMedia = navigator.getUserMedia ||
-                         navigator.webkitGetUserMedia ||
-                         navigator.mozGetUserMedia;
-
-if (navigator.getUserMedia) {
-  navigator.getUserMedia({audio: false, video: {deviceId: '/dev/video0'}},
-    function(stream) {
-      video.srcObject = stream;
-    },
-    function(err) {
-      console.log("Failed to get video stream " + err);
-    }
-  );
 }
 
 

@@ -3,12 +3,14 @@ import os
 import cv2
 import time
 import traceback
+from pprint import pprint
 from pysl import Config,truepath
 from mask2angle import core
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
     from utils import Timeit,Timety,Timer
+    from utils import ser_read,quene_get
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
@@ -24,10 +26,11 @@ def run(Q_order,cfg):
     assert 'main.py' in os.listdir() , 'work directory is not correct'
     os.mkdir(log_dir)
 
-    logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'),ser=None)        # gpio输出
-    logger_results =Fplog(os.path.join(log_dir,'results.txt'),ser=None)      # 预测结果输出
-    logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'),ser=None)    # 循环计时
-    logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'),ser=None)    # 模型运行
+    #logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'))         # gpio输出
+    logger_results =Fplog(os.path.join(log_dir,'results.txt'))      # 预测结果输出
+    logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'))     # 循环计时
+    logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'))     # 模型运行
+    logger_list=[logger_results,logger_looptime,logger_modelrun]
 
     try:
         T=time.time() # 总计时
@@ -67,15 +70,19 @@ def run(Q_order,cfg):
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
         timer_predict=Timer(0.05) # 最多0.05s识别一次
-        timer_loop=Timer(5) # 循环log最多10输出一次
+        timer_loop=Timer(5) # 循环log最多5s输出一次
 
-        Start=True # 首次运行标志
+        Start=False # 首次运行标志
         switch=True # 左右摄像头切换
         loop_times=0 
         result_l=result_r=[]
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
-        
+            if not (Start or ser_read()=='run' or quene_get(Q_order)=='run'):
+                continue
+            else:
+                Start=True
+
             t=time.time() # 循环开始计时
             loop_times+=1 
 
@@ -101,7 +108,7 @@ def run(Q_order,cfg):
                 #switch=not switch
                 #set_all_gpio('111111',normal=False,ser=None,logger=logger_gpio) # low speed
                 
-            if T-time.time()>(8*60): # 防死机
+            if T-time.time()>(10*60): # 防死机
                 raise TimeoutError
             
             if timer_loop.T():
@@ -115,12 +122,12 @@ def run(Q_order,cfg):
 
     finally:
         mmap('release',caplist) # 释放资源
-        mmap('close',[logger_gpio,logger_looptime,logger_modelrun,logger_results])
+        mmap('close',logger_list)
 
 
 if __name__=='__main__':
 
-    print(Config(truepath(__file__,'../configs.json')).data)
+    pprint(Config(truepath(__file__,'../configs.json')).data)
 
     if os.name!='nt':
         #run(Q(),Config(truepath(__file__,'../configs.json')).data)

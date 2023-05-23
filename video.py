@@ -48,8 +48,7 @@ def main_tasker(Q_Order):
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))  
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
-        
-
+    
         while not Q_Order.qsize():
             pass
         if not Q_Order.get()!='1':

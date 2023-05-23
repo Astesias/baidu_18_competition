@@ -3,6 +3,8 @@ from multiprocessing import Queue
 from pysl import Config,os_enter,easy_request
 import os,config_make,time
 
+from Baidu_18_ysl import run
+
 Q_Order=Queue(maxsize=5)
 config_make.make_cfg()
 
@@ -26,20 +28,23 @@ def get_order(Q_Order,server):
         time.sleep(1)
         order=easy_request(server+'/order/')
         if order!='NoData':
+            print(order,'-----------------')
             Q_Order.put(order)
+            if order=='exit':
+                return
             if Q_Order.qsize()==5:
                 Q_Order.get()
-            print(order,'-----------------')
+                print('order num max')
 
-def main_tasker(Q_Order):
+def main_tasker(Q_Order,cfg):
     with os_enter() as oe:
         oe.cd('Badui_18_ysl')
-        
+        run(Q_Order,cfg)
 
 
 
 if __name__=='__main__':
     pcs(target=server_tasker,args=[server,port]).start()
     pcs(target=get_order,args=[Q_Order,server]).start()
-    pcs(target=main_tasker,args=[Q_Order]).start()
+    pcs(target=main_tasker,args=[Q_Order,cfg]).start()
     

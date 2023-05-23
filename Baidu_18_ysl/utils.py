@@ -13,8 +13,8 @@ class Fplog():
         self.ser=ser
     def add(self,message):
         self.fp.write('{} : {}\n'.format(getime(),message))
-        if self.ser:
-            self.ser.Send_data( (message+'\n').encode('utf8'))
+        # if self.ser:
+        #     self.ser.Send_data( (message+'\n').encode('utf8'))
     def close(self):
         self.fp.close()
 
@@ -275,3 +275,14 @@ def check_cap(capl,**kw):
         break
       if time.time()-t>10:
           raise IOError('Camera open failed')
+      
+
+############################################## communicate
+
+def ser_read(ser):
+    if ser.inWaiting():
+        return ser.read()
+
+def quene_get(Q):
+    if Q.qsize():
+        return Q.get()
