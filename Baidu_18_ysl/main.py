@@ -12,7 +12,7 @@ from mask2angle import core
 if os.name!='nt':
     from utils import Serial_init,Fplog
     from utils import Timeit,Timety,Timer
-    from utils import ser_read,quene_get
+    from utils import ser_read,quene_get,order_respone
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
@@ -81,11 +81,13 @@ def run(Q_order,cfg):
         result_l=result_r=[]
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
-            if not (Start or ser_read(ser) or quene_get(Q_order)=='run'):
+            order=quene_get(Q_order,frame=frame)
+            order_respone(order)
+            if not (Start or ser_read(ser) or order=='run'):
                 continue
             else:
                 Start=True
-            if ser_read(ser) or quene_get(Q_order)=='exit':
+            if ser_read(ser) or order=='exit':
                 Start=False
 
             t=time.time() # 循环开始计时

@@ -293,3 +293,12 @@ def ser_read(ser):
 def quene_get(Q):
     if Q.qsize():
         return Q.get()
+    
+def order_respone(order,frame=None):
+    if order=='update':
+        assert frame
+        cv2.imwrite('../tmp.jpg',frame)
+
+
+
+def frame_cut():
