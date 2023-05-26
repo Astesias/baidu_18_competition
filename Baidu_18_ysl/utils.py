@@ -280,8 +280,15 @@ def check_cap(capl,**kw):
 ############################################## communicate
 
 def ser_read(ser):
-    if ser.inWaiting():
-        return ser.read()
+    try:
+      if ser.main_engine.inWaiting():
+          ser.main_engine.flushInput() 
+          ser.main_engine.flushOutput() 
+          return True
+    except:
+      ser.main_engine.flushInput() 
+      ser.main_engine.flushOutput() 
+      return False
 
 def quene_get(Q):
     if Q.qsize():

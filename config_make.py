@@ -17,7 +17,6 @@ def make_cfg():
         cfg.clean()
 
         cfg.add('port')
-        cfg.add('serial_host')
         cfg.add('serial_bps')
         cfg.add('model_dir')
         cfg.add('serial_bps')
