@@ -21,7 +21,7 @@ def run(Q_order,cfg):
     h,w=cfg['input_frame_size']
     assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
   
-    serial_host,serial_bps=cfg['serial_host'],14400
+    serial_host,serial_bps=cfg['serial_host'],cfg['serial_bps']
     ser=Serial_init(serial_host,serial_bps,0.5)
 
     log_dir='log/'+getime()
@@ -38,7 +38,7 @@ def run(Q_order,cfg):
         T=time.time() # 总计时
         timeit=Timeit('Initialization') # 开始初始化
         
-        cap1 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 前摄像头
+        cap1 = cv2.VideoCapture('/dev/'+cfg['videos'][0],cv2.CAP_V4L) # 前摄像头
         #cap2 = cv2.VideoCapture('/dev/video1',cv2.CAP_V4L) # 左摄像头
         #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
         caplist=[cap1,]#cap2,cap3]

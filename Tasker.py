@@ -23,7 +23,7 @@ def server_tasker(server,port):
             oe.cmd(f'python3 manage.py runserver 0.0.0.0:{port}')
 
 def get_order(Q_Order,server):
-    time.sleep(2)
+    time.sleep(6)
     while 1:
         time.sleep(1)
         order=easy_request(server+'/order/')

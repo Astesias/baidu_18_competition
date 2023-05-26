@@ -1,1 +1,0 @@
-python sender.py runserver 0.0.0.0:1881
