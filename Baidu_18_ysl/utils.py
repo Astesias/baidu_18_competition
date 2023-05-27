@@ -301,4 +301,3 @@ def order_respone(order,frame=None):
 
 
 
-def frame_cut():

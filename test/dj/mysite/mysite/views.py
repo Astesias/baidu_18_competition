@@ -56,7 +56,9 @@ def data(request):
 
         if Q.qsize():
             msg=Q.get()
-            res=f'[{last:.2f}s]|{msg}'
+    
+            res=' [{:.2f}] '.format(last).ljust(10,'x')+f'| {msg: <6}'
+            res=res.replace('x','&#8194')
 
             return HttpResponse(res)
         else:

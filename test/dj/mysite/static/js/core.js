@@ -42,14 +42,50 @@ function button(index){
 
 
 
-var maxlength_=10
-var maxlength=10;
+var d_maxlength_=10
+var d_maxlength=10;
+var s_maxlength_=10
+var s_maxlength=10;
 var getdata=null
+
+
+
+
+function msd_d(msg){
+    list=$("#list-d");
+    var varitem= "<div id=d{0} class=\"log\">{1}</div>"
+    var fmtitem= String.format(varitem,d_maxlength,msg)
+    list.append(fmtitem);
+    d_maxlength--;
+    if (d_maxlength<0){
+        var rmitem= String.format("#d{0}",d_maxlength+d_maxlength_+1)
+        $(rmitem).remove()
+    
+    var ele = document.getElementById('list-d');
+    ele.scrollTop = ele.scrollHeight;
+    }
+}
+
+function msd_s(msg){
+    list=$("#list-s");
+    var varitem= "<div id=s{0} class=\"log\">{1}</div>"
+    var fmtitem= String.format(varitem,s_maxlength,msg)
+    list.append(fmtitem);
+    s_maxlength--;
+    if (s_maxlength<0){
+        var rmitem= String.format("#s{0}",s_maxlength+s_maxlength_+1)
+        $(rmitem).remove()
+    }
+
+    var ele = document.getElementById('list-s');
+    ele.scrollTop = ele.scrollHeight;
+}
+
+
 function ADD(){
 
     list=$("#list-d");
-
-    var varitem= "<div id={0} class=\"log\">{1}</div>"
+    list=$("#list-s");
 
     $.get('/data'+ Date.now(),{},
                 function(data){
@@ -61,19 +97,19 @@ function ADD(){
     if (getdata==null || getdata=='NoData')
             return
 
-    var fmtitem= String.format(varitem,maxlength,getdata)
-
-    list.append(fmtitem);
-    
-    var ele = document.getElementById('list-d');
-    ele.scrollTop = ele.scrollHeight;
-
-    maxlength--;
-
-    if (maxlength<0){
-        var rmitem= String.format("#{0}",maxlength+maxlength_+1)
-        $(rmitem).remove()
+    console.log(getdata,getdata.slice(1))
+    if (getdata.indexOf('D')!=-1){
+        msd_d(getdata.slice(1))
+        return
     }
+    if (getdata.indexOf('S')!=-1){
+        msd_s(getdata.slice(1))
+        return
+    }
+
+
+
+
 }
 
 
