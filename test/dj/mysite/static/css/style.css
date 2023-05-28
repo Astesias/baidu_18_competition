@@ -23,7 +23,7 @@
 #list-d {
 
     position: fixed;
-    height: 20%;
+    height: 60%;
     width: 30%;
     overflow-y:auto;
     background-color: aliceblue;
@@ -37,7 +37,7 @@
 
 #list-s {
     position: fixed;
-    height: 20%;
+    height: 60%;
     width: 30%;
     overflow-y:auto;
     background-color: aliceblue;
