@@ -123,18 +123,13 @@ button:active {
 }
 
 
-img-container {
-      position: relative;
-      text-align: center;
-      height: 640px; /* 只是为了演示效果，实际应用中可以根据需要自行调整 */
-    }
-
-
 img {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  width: 400px;
+  height: 300px;
 }
 
 
