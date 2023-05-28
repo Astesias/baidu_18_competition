@@ -113,13 +113,7 @@ button:active {
 }
 
 
-img{
-    position: fixed;
-    left: 30%;
-    bottom: 0%;
-    width: fit-content;
-    height: fit-content;
-}
+
 
 .container{
     position: absolute;
@@ -127,3 +121,24 @@ img{
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+
+img-container {
+      position: relative;
+      text-align: center;
+      height: 640px; /* 只是为了演示效果，实际应用中可以根据需要自行调整 */
+    }
+
+
+img {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+
+
+
+

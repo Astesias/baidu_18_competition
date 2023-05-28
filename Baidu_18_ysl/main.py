@@ -63,6 +63,8 @@ def run(Q_order,cfg):
         #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
         def SegmentationRoad(cap,display=False):
             _,frame=cap.read()
+            nonlocal order
+            order_respone(order,frame=frame)
             angle=core(frame)
             if display:
                 display_angle(frame,angle)
@@ -81,8 +83,9 @@ def run(Q_order,cfg):
         result_l=result_r=[]
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
-            order=quene_get(Q_order,frame=frame)
-            order_respone(order)
+            
+            order=quene_get(Q_order)
+            
             if not (Start or ser_read(ser) or order=='run'):
                 continue
             else:

@@ -294,10 +294,9 @@ def quene_get(Q):
     if Q.qsize():
         return Q.get()
     
-def order_respone(order,frame=None):
+def order_respone(order,frame):
     if order=='update':
-        assert frame
-        cv2.imwrite('../tmp.jpg',frame)
+        cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
 
 
 
