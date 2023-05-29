@@ -99,7 +99,7 @@ def run(Q_order,cfg):
             if Start:
                 line_info=SegmentationRoad(cap1)
                 sprint(line_info,T=T,ser=None,logger=logger_results,end='\n\r')
-                post_data(cfg.server,f'S{line_info}')
+                # post_data(cfg.server,f'S{line_info}')
                 try:
                   ser.main_engine.flushInput() 
                   ser.main_engine.flushOutput() 
