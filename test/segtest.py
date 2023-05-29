@@ -2,7 +2,7 @@
 import numpy as np
 from edgeboard import *
 import sys
-from cor import *
+from core import *
 import cv2,os
 from fline import FollowLine
 
