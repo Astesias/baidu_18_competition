@@ -12,7 +12,7 @@ from mask2angle import core
 if os.name!='nt':
     from utils import Serial_init,Fplog
     from utils import Timeit,Timety,Timer
-    from utils import ser_read,quene_get,order_respone
+    from utils import ser_read,quene_get,order_respone,post_data
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
@@ -99,6 +99,7 @@ def run(Q_order,cfg):
             if Start:
                 line_info=SegmentationRoad(cap1)
                 sprint(line_info,T=T,ser=None,logger=logger_results,end='\n\r')
+                post_data(cfg.server,f'S{line_info}')
                 try:
                   ser.main_engine.flushInput() 
                   ser.main_engine.flushOutput() 

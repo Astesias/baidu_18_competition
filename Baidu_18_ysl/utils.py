@@ -298,5 +298,7 @@ def order_respone(order,frame):
     if order=='update':
         cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
 
-
-
+from pysl import easy_request
+def post_data(server,data):
+    easy_request(server+'/data/',method='POST',data={'msg':data},
+                     header={"Content-type": "application/json"})
