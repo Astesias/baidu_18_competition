@@ -51,13 +51,13 @@ def main_tasker(Q_Order):
     
         while not Q_Order.qsize():
             pass
-        if not Q_Order.get()!='1':
-            print('not start , return')
+        if not Q_Order.get()!='video_on':
+            print('video record return')
             return
         else:
             writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
             time.sleep(1)
-            print('start',cap.isOpened())
+            print('video on',cap.isOpened())
 
         while cap.isOpened():
             _, frame = cap.read() 
@@ -65,12 +65,8 @@ def main_tasker(Q_Order):
             
             if Q_Order.qsize():
                 order=Q_Order.get()
-                if order=='9':
+                if order=='video_off':
                     break
-                elif order=='2':
-                    pass
-                    # cmd('rm ./test/dj/mysite/static/img/tmp.jpg')
-                    # framewrite(frame,'./test/dj/mysite/static/img/tmp.jpg')
         
 
 

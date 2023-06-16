@@ -84,6 +84,7 @@ def run(Q_order,cfg):
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
             
+            #############
             order=quene_get(Q_order)
             
             if not (Start or ser_read(ser) or order=='run'):
@@ -92,6 +93,7 @@ def run(Q_order,cfg):
                 Start=True
             if ser_read(ser) or order=='exit':
                 Start=False
+            #############
 
             t=time.time() # 循环开始计时
             loop_times+=1 

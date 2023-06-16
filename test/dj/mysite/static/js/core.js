@@ -16,19 +16,22 @@ function print(arg){
 function button(index){
     switch(index){
         case 1:
-            order='start'
+            order='run'
             break
         case 2:
             order='update'
             break
         case 3:
-            order='run'
-            break
-        case 4:
             order='exit'
             break
-        case 9:
-            order='stop'
+        case 4:
+            order='video_on'
+            break
+        case 5:
+            order='video_off'
+            break
+        case 7:
+            order='shot'
             break
         default:
             order=index
