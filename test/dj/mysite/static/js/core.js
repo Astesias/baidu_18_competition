@@ -33,6 +33,9 @@ function button(index){
         case 7:
             order='shot'
             break
+        case 8:
+            order='shot_off'
+            break
         default:
             order=index
 
