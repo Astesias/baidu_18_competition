@@ -4,7 +4,7 @@ from pysl import Config, getip
 def make_cfg():
     config = {
         'port': 1881,
-        # 'serial_host': "/dev/ttyPS0",
+        'serial_host': "/dev/ttyUSB0",
         'serial_bps': 115200,
         'model_dir': os.path.abspath('.test/face_model'),
         'model_json': 'usb_yolov3.json',
@@ -18,6 +18,7 @@ def make_cfg():
 
         cfg.add('port')
         cfg.add('serial_bps')
+        cfg.add('serial_host')
         cfg.add('model_dir')
         cfg.add('serial_bps')
         cfg.add('input_frame_size')
@@ -30,8 +31,16 @@ def make_cfg():
         cfg.add('main_task', os.path.abspath(config.get('main_task')))
         
         if os.name!='nt':
-          cfg.add('videos',[i for i in os.listdir('/dev') if 'video' in i])
-          cfg.add('serial_host',"/dev/ttyUSB0" if 'ttyUSB0' in os.listdir('/dev') else '/dev/ttyPS0')
+          videos=[]
+          for i in os.listdir('/dev'):
+              if 'video' in i:
+                videos.append(i)
+          if not videos:
+            print("Warning video not found")
+          cfg.add('videos',videos)
+          
+          if "ttyUSB0" not in os.listdir('/dev'):
+            print("Warning Usbserial not found")
      
 
     return cfg
