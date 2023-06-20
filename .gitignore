@@ -3,6 +3,7 @@ Demoes
 driver
 lost*
 *.txt
+*.jpg
 
 __pycache__
 log/
