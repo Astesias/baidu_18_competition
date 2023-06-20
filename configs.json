@@ -12,5 +12,7 @@
   "model_json": "/root/workspace/.test/face_model/usb_yolov3.json",
   "server_task": "/root/workspace/test/dj/mysite/sender.py",
   "main_task": "/root/workspace/Baidu_18_ysl/main.py",
-  "videos": []
+  "videos": [
+    "video0"
+  ]
 }

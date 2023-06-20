@@ -51,7 +51,7 @@ def main_tasker(Q_Order):
     
         while not Q_Order.qsize():
             pass
-        if not Q_Order.get()!='video_on':
+        if Q_Order.get()!='video_on':
             print('video record return')
             return
         else:
