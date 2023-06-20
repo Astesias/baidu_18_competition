@@ -16,7 +16,7 @@ server,port=cfg.server,cfg.port
 
 def server_tasker(server,port):
 
-    print(f'Django server on {server}')
+    print(f'\nDjango server on {server}\n')
 
     with os_enter('./') as oe:
         oe.cd('test/dj/mysite')
