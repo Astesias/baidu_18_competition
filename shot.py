@@ -1,7 +1,7 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
 from pysl import Config,os_enter,easy_request,cmd
-import os,config_make,time,cv2
+import os,config_make,time,cv2,sys
 
 Q_Order=Queue(maxsize=5)
 config_make.make_cfg()
@@ -31,14 +31,14 @@ def get_order(Q_Order,server):
                 Q_Order.get()
             print(order,'-----------------')
 
-def main_tasker(Q_Order):
+def main_tasker(Q_Order,class_name=''):
     import time 
     time.sleep(6)
     import cv2
     
     n = 0
     while 1:
-      if f'{n+1:0>5}.jpg' not in os.listdir('output'):
+      if f'{pathname(n,class_name)}' not in os.listdir('output'):
         break
       else:
         n+=1
@@ -54,8 +54,7 @@ def main_tasker(Q_Order):
                 order=Q_Order.get()
                 if order=='shot':
                     n+=1
-                    cnt=f'{n:0>5}'
-                    path=f'./output/{cnt}.jpg'
+                    path=f'./output/{pathname(n,class_name)}'
                     framewrite(frame,path)
                     print(f'frame saved in {path}')
                     
@@ -82,10 +81,19 @@ def main_tasker(Q_Order):
 def framewrite(frame,path):
     cv2.imwrite(path,frame)
 
+def pathname(n,class_name):
+  if class_name:
+    return f'{class_name}_{n:0>5}.jpg'
+  else:
+    return f'{n:0>5}.jpg'
 
 
 if __name__=='__main__':
+    if len(sys.argv)>=2:
+      class_name=sys.argv[1]
+    else:
+      class_name=''
     pcs(target=server_tasker,args=[server,port]).start()
     pcs(target=get_order,args=[Q_Order,server]).start()
-    pcs(target=main_tasker,args=[Q_Order]).start()
+    pcs(target=main_tasker,args=[Q_Order,class_name]).start()
     
