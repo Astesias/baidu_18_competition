@@ -58,6 +58,7 @@ def main_tasker(Q_Order):
                     print(f'frame saved in {path}')
                     n+=1
                     cnt=f'{n:0>5}'
+                    cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',frame)
                 elif order=='shot_off':
                     break
         cap.release()      
