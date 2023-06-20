@@ -134,7 +134,7 @@ def framewrite(frame,path):
     cv2.imwrite(path,frame)
 
 def pathname(n):
-    return f'{n}.jpg'
+    return f'angle_test_{n}.jpg'
 
 
 
