@@ -36,13 +36,13 @@ def main_tasker(Q_Order):
     time.sleep(6)
     import cv2
     
-    n = 1
+    n = 0
     while 1:
-      if f'{n:0>5}.jpg' not in os.listdir('output'):
+      if f'{n+1:0>5}.jpg' not in os.listdir('output'):
         break
       else:
         n+=1
-    cnt=f'{n:0>5}'
+    
     while 1:
         vdir='/dev/video0'
         cap=cv2.VideoCapture(vdir,cv2.CAP_V4L)     
@@ -53,12 +53,20 @@ def main_tasker(Q_Order):
             if Q_Order.qsize():
                 order=Q_Order.get()
                 if order=='shot':
+                    n+=1
+                    cnt=f'{n:0>5}'
                     path=f'./output/{cnt}.jpg'
                     framewrite(frame,path)
                     print(f'frame saved in {path}')
-                    n+=1
-                    cnt=f'{n:0>5}'
-                    cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',frame)
+                    
+                    framewrite(frame,'test/dj/mysite/static/img/tmp.jpg')
+                elif order=='shot_del':
+                    try:
+                        os.remove(path)
+                        n-=1
+                        print(f'delete {path}')
+                    except:
+                        print('Nothing to delete')
                 elif order=='shot_off':
                     break
         cap.release()      

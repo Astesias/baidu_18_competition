@@ -20,6 +20,7 @@ function button(index){
             break
         case 2:
             order='update'
+            location.reload();
             break
         case 3:
             order='exit'
@@ -34,6 +35,9 @@ function button(index){
             order='shot'
             break
         case 8:
+            order='shot_del'
+            break
+        case 9:
             order='shot_off'
             break
         default:
@@ -88,6 +92,8 @@ function msd_s(msg){
 }
 
 
+
+
 function ADD(){
 
     list=$("#list-d");
@@ -112,8 +118,6 @@ function ADD(){
         msd_s(getdata.slice(1))
         return
     }
-
-
 
 
 }
