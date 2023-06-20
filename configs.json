@@ -1,0 +1,16 @@
+{
+  "port": 1881,
+  "serial_bps": 115200,
+  "serial_host": "/dev/ttyUSB0",
+  "model_dir": "/root/workspace/.test/face_model",
+  "input_frame_size": [
+    128,
+    128
+  ],
+  "host": "192.168.16.121",
+  "server": "http://192.168.16.121:1881",
+  "model_json": "/root/workspace/.test/face_model/usb_yolov3.json",
+  "server_task": "/root/workspace/test/dj/mysite/sender.py",
+  "main_task": "/root/workspace/Baidu_18_ysl/main.py",
+  "videos": []
+}
