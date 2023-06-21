@@ -107,7 +107,7 @@ def main_tasker(Q_Order):
     while 1:
         vdir='/dev/video0'
         cap=cv2.VideoCapture(vdir,cv2.CAP_V4L)     
-
+        n=0
         while cap.isOpened():
             _, frame = cap.read() 
             
