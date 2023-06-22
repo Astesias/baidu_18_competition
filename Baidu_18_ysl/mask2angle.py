@@ -59,7 +59,7 @@ def core(img,resize=None,mask=None):
          
         
     k=areas/sum(areas)
-    return sum(lrs*k)
+    return -sum(lrs*k)/90*60
 
 
 

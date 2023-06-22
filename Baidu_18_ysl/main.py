@@ -7,7 +7,7 @@ import traceback
 from pprint import pprint
 from pysl import Config,truepath
 
-from mask2angle import core
+from mask2angle2 import core
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
@@ -70,7 +70,7 @@ def run(Q_order,cfg):
                 display_angle(frame,angle)
                 cv2.waitKey(10)
                 
-            return '{:.0f}'.format(angle)
+            return '{:.0f}'.format(-angle)
 
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
@@ -102,15 +102,11 @@ def run(Q_order,cfg):
                 line_info=SegmentationRoad(cap1)
                 sprint(line_info,T=T,ser=None,logger=logger_results,end='\n\r')
                 # post_data(cfg.server,f'S{line_info}')
-                try:
-                  ser.main_engine.flushInput() 
-                  ser.main_engine.flushOutput() 
-                  sprint(f'[!0:{line_info}/]\n\r',T=T,ser=ser,logger=None,normal=False)
-                except:
-                  ser.main_engine.close()
-                  print('wait serial ')
-                  time.sleep(3)
-                  ser=Serial_init(serial_host,serial_bps,0.5)
+
+                ser.main_engine.flushInput() 
+                ser.main_engine.flushOutput() 
+                sprint(f'[!0:{line_info}/]',T=T,ser=ser,logger=None,normal=False)
+
 
             # if timer_predict.T():   
 
