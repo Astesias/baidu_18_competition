@@ -65,15 +65,11 @@ def predict(frame, timer):
 
         shape_tensor = g_predictor.set_input(feed_shape, 1)
 
-    global IS_FIRST_RUN
-    if IS_FIRST_RUN:
-        IS_FIRST_RUN = False
-        g_predictor.run()
-    else:
-        timer.Continue()
-        g_predictor.run()
-        timer.Pause()
+
+    g_predictor.run()
+
     outputs = np.array(g_predictor.get_output(0))
+    #print(outputs.shape)
 
     res = list()
     if outputs.shape[1] == 6:
@@ -126,18 +122,19 @@ def drawResults(frame, results):
     frame_shape = frame.shape
     for r in results:
         r = boundaryCorrection(r, frame_shape[1], frame_shape[0])
+        print(r.type)
         if r.type >= 0 and r.type < len(g_model_config.labels):
             origin = (r.x, r.y)
             label_name = g_model_config.labels[r.type]
             cv2.putText(frame, label_name, origin, cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 224), 2)
             cv2.rectangle(frame, (r.x, r.y), (r.x + r.width, r.y + r.height), (0, 0, 224), 2)
 
-#            print('name: {}, xs: {} , ys: {} w: {} ,h: {}'.format(
-#                  label_name,
-#                  r.x,
-#                  r.y,
-#                  r.width,
-#                  r.height))
+            print('name: {}, xs: {} , ys: {} w: {} ,h: {}'.format(
+                  label_name,
+                  r.x,
+                  r.y,
+                  r.width,
+                  r.height))
 
 
 
@@ -183,15 +180,12 @@ if __name__ == "__main__":
             printResults(origin_frame, predict_result)
             pass
         if g_system_config.predict_log_enable and capture.getType() != "image":
-            display.putFrame(origin_frame)
+            pass
+            #display.putFrame(origin_frame)
         elif capture.getType() == "image":
             cv2.imwrite("DetectionResult.jpg", origin_frame)
             break
 
-        if g_system_config.predict_time_log_enable:
-    
-            timer.printAverageRunTime()
-            pass
 
     if g_system_config.display_enable and g_system_config.input_type != "image":
         display.stop()

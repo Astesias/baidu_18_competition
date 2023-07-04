@@ -3,7 +3,7 @@ from pysl import Config, getip
 
 def make_cfg():
     config = {
-        'port': 1881,
+        'port': 8080,
         'serial_host': "/dev/ttyUSB0",
         'serial_bps': 115200,
         'model_dir': os.path.abspath('.test/face_model'),
@@ -38,9 +38,16 @@ def make_cfg():
           if not videos:
             print("Warning video not found")
           cfg.add('videos',videos)
-          
-          if "ttyUSB0" not in os.listdir('/dev'):
-            print("Warning Usbserial not found")
+       
+          usbflag=False
+          for i in os.listdir('/dev'):
+              if 'ttyUSB' in i:
+                cfg.add('serial_host','/dev/'+i) 
+                usbflag=True
+                break
+          if not usbflag:
+            print("Warning usbserial not found")
+                
      
 
     return cfg

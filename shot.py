@@ -44,7 +44,7 @@ def main_tasker(Q_Order,class_name=''):
         n+=1
     
     while 1:
-        vdir='/dev/video0'
+        vdir='/dev/video'+ (0 if len(sys.argv)<3 else sys.argv[2])
         cap=cv2.VideoCapture(vdir,cv2.CAP_V4L)     
 
         while cap.isOpened():

@@ -43,7 +43,7 @@ def main_tasker(Q_Order,cfg):
     os.chdir('./Baidu_18_ysl')
     sys.path.insert(0,'./')
     from main import run
-    run(Q_Order,cfg)
+    run(Q_Order,cfg,True)
 
 
 def data_poster(server):

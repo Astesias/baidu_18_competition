@@ -5,9 +5,9 @@ import cv2
 import time
 import traceback
 from pprint import pprint
-from pysl import Config,truepath
+from pysl import Config,truepath,mute_all
 
-from mask2angle2 import core
+from mask2angle3 import core
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
@@ -16,7 +16,7 @@ if os.name!='nt':
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
-def run(Q_order,cfg):
+def run(Q_order,cfg,open=False):
 
     h,w=cfg['input_frame_size']
     assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
@@ -44,6 +44,7 @@ def run(Q_order,cfg):
         caplist=[cap1,]#cap2,cap3]
         mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
         mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
+        #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
         DISPLAYER,MODEL_CONFIG,PREDICTOR=[None,None,None]#detection_init(cfg['model_json'])
@@ -65,6 +66,7 @@ def run(Q_order,cfg):
             _,frame=cap.read()
             nonlocal order
             order_respone(order,frame=frame)
+            #with mute_all():
             angle=core(frame)
             if display:
                 display_angle(frame,angle)
@@ -87,7 +89,7 @@ def run(Q_order,cfg):
             #############
             order=quene_get(Q_order)
             
-            if not (Start or ser_read(ser) or order=='run'):
+            if not (Start or ser_read(ser) or order=='run' or len(sys.argv)==2 or open):
                 continue
             else:
                 Start=True
@@ -105,7 +107,7 @@ def run(Q_order,cfg):
 
                 ser.main_engine.flushInput() 
                 ser.main_engine.flushOutput() 
-                sprint(f'[!0:{line_info}/]',T=T,ser=ser,logger=None,normal=False)
+                sprint(f'[:{line_info}/]',T=T,ser=ser,logger=None,normal=False)
 
 
             # if timer_predict.T():   
@@ -137,6 +139,7 @@ def run(Q_order,cfg):
         logger_results.add('{:.2f} : Error raised'.format(time.time()-T))
         logger_results.add(traceback.format_exc())
         print('Error main.py return ')
+        print(traceback.format_exc())
 
     finally:
         mmap('release',caplist) # 释放资源
@@ -148,5 +151,7 @@ if __name__=='__main__':
     pprint(Config(truepath(__file__,'../configs.json')).data)
 
     if os.name!='nt':
+        from multiprocessing import Queue 
+        Q_Order=Queue(maxsize=5)
         #run(Q(),Config(truepath(__file__,'../configs.json')).data)
-        run(None,Config(truepath(__file__,'../configs.json')))
+        run(Q_Order,Config(truepath(__file__,'../configs.json')))
