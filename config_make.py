@@ -34,7 +34,7 @@ def make_cfg():
           videos=[]
           for i in os.listdir('/dev'):
               if 'video' in i:
-                videos.append(i)
+                videos.append('/dev/'+i)
           if not videos:
             print("Warning video not found")
           cfg.add('videos',videos)
