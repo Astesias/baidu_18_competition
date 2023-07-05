@@ -11,6 +11,9 @@ import sys
 os.chdir('./Baidu_18_ysl')
 sys.path.insert(0,'./')
 from core import Display,SystemConfig,ModelConfig,Timer,createCapture,fpga_preprocess
+os.chdir('..')
+sys.path.insert(0,'./')
+
 import cv2
 
 Q_Order=Queue(maxsize=5)
@@ -157,7 +160,7 @@ def server_tasker(server,port):
     print(f'\nDjango server on {server}\n')
 
     with os_enter('./') as oe:
-        oe.cd('../test/dj/mysite')
+        oe.cd('test/dj/mysite')
         if os.name=='nt':
             oe.cmd(f'python manage.py runserver 0.0.0.0:{port}')
         else:
@@ -201,7 +204,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         system_config_path = sys.argv[1]
     else:
-        system_config_path = "../dete_model/usb.json" #"../configs/detection/yolov3/image.json"
+        system_config_path = "dete_model/usb.json" #"../configs/detection/yolov3/image.json"
 
     print("SystemConfig Path: {}".format(system_config_path))
     g_system_config = SystemConfig(system_config_path)
@@ -233,8 +236,10 @@ if __name__ == "__main__":
                     read_cap=abs(read_cap-1)
                 elif order=='update':
                     update_frame=True
+                    
 
             _,frame=caps[read_cap].read()
+            print(frame.shape)
             origin_frame = frame.copy()
 
             predict_result = predict(origin_frame, timer)
@@ -244,6 +249,7 @@ if __name__ == "__main__":
             if update_frame:
                 update_frame=False
                 drawResults(origin_frame, predict_result)
+                os.remove('test/dj/mysite/static/img/tmp.jpg')
                 cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',frame)
                 # display.putFrame(origin_frame)
     except:
