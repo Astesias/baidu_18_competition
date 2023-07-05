@@ -31,7 +31,7 @@ function button(index){
         case 5:
             order='video_off'
             break
-        case 5:
+        case 6:
             order='video_sw'
             break
         case 7:

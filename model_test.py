@@ -1,6 +1,6 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
-from pysl import Config,os_enter,easy_request
+from pysl import Config,os_enter,easy_request,mmap
 import os,config_make,time,sys
 from pprint import pprint
 import numpy as np
@@ -140,10 +140,11 @@ def drawResults(frame, results):
     for r in results:
         r = boundaryCorrection(r, frame_shape[1], frame_shape[0])
         if r.type >= 0 and r.type < len(g_model_config.labels):
-            origin = (r.x, r.y)
+            origin = (r.x, r.y+20)
             label_name = g_model_config.labels[r.type]
-            cv2.putText(frame, label_name, origin, cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 224), 2)
-            cv2.rectangle(frame, (r.x, r.y), (r.x + r.width, r.y + r.height), (0, 0, 224), 2)
+            cv2.putText(frame, label_name.replace('building_',''), 
+                        origin, cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255, 255, 224) , 1)
+            cv2.rectangle(frame, (r.x, r.y), (r.x + r.width, r.y + r.height), (0, 0, 224),1)
 
             print('name: {}, xs: {} , ys: {} w: {} ,h: {}'.format(
                     label_name,
@@ -219,6 +220,9 @@ if __name__ == "__main__":
     cap1=cv2.VideoCapture(cfg.videos[0],cv2.CAP_V4L)
     cap2=cv2.VideoCapture(cfg.videos[1],cv2.CAP_V4L)
     caps=[cap1,cap2]
+    mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_WIDTH, 320]) 
+    mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_HEIGHT,320])
+    
 
     ret = predictorInit()
     if ret != 0:
@@ -239,6 +243,7 @@ if __name__ == "__main__":
                     
 
             _,frame=caps[read_cap].read()
+            frame=cv2.resize(frame,(320,320))
             print(frame.shape)
             origin_frame = frame.copy()
 
@@ -250,7 +255,7 @@ if __name__ == "__main__":
                 update_frame=False
                 drawResults(origin_frame, predict_result)
                 os.remove('test/dj/mysite/static/img/tmp.jpg')
-                cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',frame)
+                cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',origin_frame)
                 # display.putFrame(origin_frame)
     except:
         import traceback
