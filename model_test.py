@@ -1,6 +1,6 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
-from pysl import Config,os_enter,easy_request,mmap
+from pysl import Config,os_enter,easy_request,mmap,mute_all
 import os,config_make,time,sys
 from pprint import pprint
 import numpy as np
@@ -87,6 +87,9 @@ def predict(frame, timer):
 
     g_predictor.run()
     outputs = np.array(g_predictor.get_output(0))
+    
+    #np.set_printoptions(2)
+    #print(outputs)
 
     res = list()
     if outputs.shape[1] == 6:
@@ -244,11 +247,10 @@ if __name__ == "__main__":
 
             _,frame=caps[read_cap].read()
             frame=cv2.resize(frame,(320,320))
-            print(frame.shape)
             origin_frame = frame.copy()
 
             predict_result = predict(origin_frame, timer)
-            
+
             # if g_system_config.predict_log_enable:
             #     printResults(origin_frame, predict_result)
             if update_frame:
