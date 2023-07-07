@@ -98,7 +98,8 @@ def display_angle(frame,angle):
     cv2.line(frame,p2,p1,(255,255,0),4,3)
     cv2.putText(frame,'{:^5.1f}'.format(abs(angle)),(midx+20,midy),
                 cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255) if angle>0 else (255,0,255))
-    cv2.imshow('SEG',frame)
+    # cv2.imshow('SEG',frame)
+    return frame
 
 
 ##############################################  hardware tools
@@ -282,13 +283,11 @@ def check_cap(capl,**kw):
 def ser_read(ser):
     try:
       if ser.main_engine.inWaiting():
-          ser.main_engine.flushInput() 
-          ser.main_engine.flushOutput() 
-          return True
+          return ser.Read_Line()
     except:
       ser.main_engine.flushInput() 
       ser.main_engine.flushOutput() 
-      return False
+      return ''
 
 def quene_get(Q):
     if Q.qsize():

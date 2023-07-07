@@ -6,11 +6,13 @@ def make_cfg():
         'port': 8080,
         'serial_host': "/dev/ttyUSB0",
         'serial_bps': 115200,
-        'model_dir': os.path.abspath('.test/face_model'),
-        'model_json': 'usb_yolov3.json',
+        'model_dir': os.path.abspath('./dete_model'),
+        'model_json': 'usb.json',
         'input_frame_size': (128, 128),
         'server_task': './test/dj/mysite/sender.py',
         'main_task': './Baidu_18_ysl/main.py',
+        'spray_index': 0,
+        'items_kind': 'item2'
     }
 
     with Config('./configs.json', base=config) as cfg:
@@ -22,6 +24,9 @@ def make_cfg():
         cfg.add('model_dir')
         cfg.add('serial_bps')
         cfg.add('input_frame_size')
+
+        cfg.add('spray_index')
+        cfg.add('items_kind')
 
         cfg.add('host', getip()[0])
         cfg.add('server', f'http://{getip()[0]}:'+str(cfg.port))

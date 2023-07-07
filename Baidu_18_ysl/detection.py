@@ -20,6 +20,10 @@ class PredictResult(object):
     def unpack(self,classes):
         return [classes[self.type],self.x,self.y,self.width,self.height]
 
+def predict_result(type_, score, x, y, width, height):
+    return int(type_),int(x)+int(width/2) #int(x),int(y),int(width),int(height)
+
+
 def predictorInit(g_model_config,g_predictor):
     """predictor config and initialization"""
     # global g_model_config
@@ -78,6 +82,8 @@ def predict(frame,g_model_config,g_predictor, timer=None):
 
     outputs = np.array(g_predictor.get_output(0))
 
+    outputs=outputs[np.argsort(-outputs[:, 1])] ######## sort result
+
     res = list()
     if outputs.shape[1] == 6:
         for data in outputs:
@@ -88,14 +94,14 @@ def predict(frame,g_model_config,g_predictor, timer=None):
             if g_model_config.is_yolo:
                 data[4] = data[4] - data[2]
                 data[5] = data[5] - data[3]
-                res.append(PredictResult(*data))
+                res.append(predict_result(*data))
             else:
                 h, w, _ = origin_frame.shape
                 x = data[2] * w
                 y = data[3] * h
                 width = data[4]* w - x
                 height = data[5] * h - y
-                res.append(PredictResult(type_, score, x, y, width, height))
+                res.append(predict_result(type_, score, x, y, width, height))
     return res
     
 
