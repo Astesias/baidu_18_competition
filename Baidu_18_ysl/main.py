@@ -178,39 +178,70 @@ def run(Q_order,cfg,open=False,switch_init=None):
                     
                     if results:
                       if switch_content==1: # building
-                          
-                          kind,_=results[0]
-                          print(f'Building {classes[kind]}')
-                          sprint(building_map[kind],T=T,ser=ser,logger=None)
+                            
+                            kind,_=results[0]
+                            print(f'Building {classes[kind]}')
+                            sprint(building_map[kind],T=T,ser=ser,logger=None)
   
                       elif switch_content==10: # items
-                          target_kind=classes.index(cfg['items_kind'])
-                          item_cx={1:None,2:None,3:None}
-                          item_map={7:1,8:2,9:3}
-                          for result in results:
-                              kind,cx=result
-                              kind=item_map[kind]
-                              if item_cx[kind]==None:
-                                  item_cx[kind]=cx
-                          print('Items cxes:',list(item_cx.values()))
+                            target_kind=classes.index(cfg['items_kind'])
+
+                            results.sort(key=lambda x:x[-1])
+                            results=results[:3]
+
+                            items=[_ for _ in group_map[switch_content]]
+                            for index,result in enumerate(results):
+                                kind,_=result
+                                if kind in items:
+                                    
+                                    items.remove(kind)
+                                else:
+                                    okind,rkind=results[index][0],items.pop(0)
+                                    results[index][0]=rkind
+
+                                    print(f'auto replace: {classes[okind]} -> {classes[rkind]}')
+                            
+                            sum_cx=0
+                            for index,result in enumerate(results):
+                                kind,cx=result
+                                sum_cx+=cx
+                                if target_kind==kind:
+                                    err=w/2-cx
+                            avg_cx=sum_cx/len(results)
+                            center_err=w/2-avg_cx
+                            
+                            err=err if abs(err)>20 else 0
+                            center_err=center_err if abs(center_err)>20 else 0
+                            sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
+
+
+
+                        #   item_cx={1:None,2:None,3:None}
+                        #   item_map={7:1,8:2,9:3}
+                        #   for result in results:
+                        #       kind,cx=result
+                        #       kind=item_map[kind]
+                        #       if item_cx[kind]==None:
+                        #           item_cx[kind]=cx
+                        #   print('Items cxes:',list(item_cx.values()))
   
-                          if not item_cx[2]:
-                              print('Item not found item2')
-                              continue
-                          if not item_cx[kind]:
-                              print(f'Item not found target {classes[kind]}')
-                              continue
+                        #   if not item_cx[2]:
+                        #       print('Item not found item2')
+                        #       continue
+                        #   if not item_cx[kind]:
+                        #       print(f'Item not found target {classes[kind]}')
+                        #       continue
   
-                          if item_cx[item_map[target_kind]]:                         
-                            center_err=item_cx[2]-(item_cx[item_map[target_kind]])
-                          else:
-                            if item_map[target_kind]==1:
+                        #   if item_cx[item_map[target_kind]]:                         
+                        #     center_err=item_cx[2]-(item_cx[item_map[target_kind]])
+                        #   else:
+                        #     if item_map[target_kind]==1:
                               
-                          err=w/2-item_cx[item_map[target_kind]]
+                        #   err=w/2-item_cx[item_map[target_kind]]
                           
-                          if abs(err)<10:
-                            err=center_err=0
-                          sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
+                        #   if abs(err)<10:
+                        #     err=center_err=0
+                        #   sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
   
                       elif switch_content==12: # spray
                           target_index=cfg['spray_index']
@@ -229,6 +260,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                           target_index=target_index if target_index<=1 else -1 # 0 1 -1
                           target_cx=spray_cx[target_index]
                           err=w/2-target_cx
+                          err=err if abs(err)>20 else 0
                           print(f'Spray [*{err:.0f}/]')
                           sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
                           pass
