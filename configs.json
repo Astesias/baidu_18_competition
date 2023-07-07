@@ -8,11 +8,11 @@
     320
   ],
   "spray_index": 0,
-  "items_kind": "item2",
+  "items_kind": "item1",
   "host": "192.168.53.121",
   "server": "http://192.168.53.121:8080",
   "model_json": "/root/workspace/dete_model/usb.json",
-  "server_task": "/root/workspace/test/dj/mysite/sender.py",
+  "server_task": "/root/workspace/test/dj/mysite/manage.py",
   "main_task": "/root/workspace/Baidu_18_ysl/main.py",
   "videos": [
     "/dev/video0",

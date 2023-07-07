@@ -17,9 +17,9 @@ if os.name!='nt':
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
-def run(Q_order,cfg,open=False,swicth_init=None):
+def run(Q_order,cfg,open=False,switch_init=None):
 
-    h,w=cfg['input_frame_size']
+    h,w=map(int,cfg['input_frame_size'])
     assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
   
     serial_host,serial_bps=cfg['serial_host'],cfg['serial_bps']
@@ -89,13 +89,15 @@ def run(Q_order,cfg,open=False,swicth_init=None):
         # @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 目标检测
         def PredictFrame(cap,display=False):
             _,frame=cap.read()
+            nonlocal h,w
+            frame=cv2.resize(frame,(h,w))
             if not _:
                 raise IOError('Device bandwidth beyond')
             result = predict(frame,MODEL_CONFIG,PREDICTOR)
             if display: # 可视化调试
                 drawResults(frame,result,MODEL_CONFIG)
                 DISPLAYER.putFrame(frame)
-            return mmap('unpack',result,arg=[MODEL_CONFIG.labels])
+            return result #mmap('unpack',result,arg=[MODEL_CONFIG.labels])
 
         #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
         def SegmentationRoad(cap,display=False):
@@ -120,9 +122,10 @@ def run(Q_order,cfg,open=False,swicth_init=None):
 
         Start=False # 运行标志
         switch=False # 摄像头切换
-        if swicth_init:
-          swich=True
-          switch_content=swicth_init
+        #print(switch_init)
+        if switch_init:
+          switch=True
+          switch_content=switch_init
         # loop_times=0 
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
@@ -170,7 +173,8 @@ def run(Q_order,cfg,open=False,swicth_init=None):
                 else:
                     results=PredictFrame(cap2)
                     result_from='cap2'
-                    results=[row for row in results if row in group_map[switch_content]]
+                    results=[row for row in results if row[0] in group_map[switch_content]]
+                    print(results)
                     
                     if results:
                       if switch_content==1: # building
@@ -179,27 +183,33 @@ def run(Q_order,cfg,open=False,swicth_init=None):
                           print(f'Building {classes[kind]}')
                           sprint(building_map[kind],T=T,ser=ser,logger=None)
   
-                      elif switch_content==7: # items
+                      elif switch_content==10: # items
                           target_kind=classes.index(cfg['items_kind'])
                           item_cx={1:None,2:None,3:None}
                           item_map={7:1,8:2,9:3}
                           for result in results:
                               kind,cx=result
                               kind=item_map[kind]
-                              if item_cx[kind]!=None:
+                              if item_cx[kind]==None:
                                   item_cx[kind]=cx
                           print('Items cxes:',list(item_cx.values()))
   
                           if not item_cx[2]:
                               print('Item not found item2')
                               continue
-                          if not item_cx[target_kind]:
+                          if not item_cx[kind]:
                               print(f'Item not found target {classes[kind]}')
                               continue
   
-                          center_err=item_cx[2]-item_cx[target_kind]
-                          err=w/2-item_cx[target_kind]
-                          print(f'Items [&{err:.0f}:{center_err:.0f}/]')
+                          if item_cx[item_map[target_kind]]:                         
+                            center_err=item_cx[2]-(item_cx[item_map[target_kind]])
+                          else:
+                            if item_map[target_kind]==1:
+                              
+                          err=w/2-item_cx[item_map[target_kind]]
+                          
+                          if abs(err)<10:
+                            err=center_err=0
                           sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
   
                       elif switch_content==12: # spray

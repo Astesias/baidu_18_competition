@@ -9,10 +9,10 @@ def make_cfg():
         'model_dir': os.path.abspath('./dete_model'),
         'model_json': 'usb.json',
         'input_frame_size': (320, 320),
-        'server_task': './test/dj/mysite/sender.py',
+        'server_task': './test/dj/mysite/manage.py',
         'main_task': './Baidu_18_ysl/main.py',
         'spray_index': 0,
-        'items_kind': 'item2'
+        'items_kind': 'item1'
     }
 
     with Config('./configs.json', base=config) as cfg:

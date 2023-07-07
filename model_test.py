@@ -146,7 +146,7 @@ def drawResults(frame, results):
             origin = (r.x, r.y+20)
             label_name = g_model_config.labels[r.type]
             cv2.putText(frame, label_name.replace('building_',''), 
-                        origin, cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255, 255, 224) , 1)
+                        origin, cv2.FONT_HERSHEY_SIMPLEX, 0.5,(255, 255, 224) , 1)
             cv2.rectangle(frame, (r.x, r.y), (r.x + r.width, r.y + r.height), (0, 0, 224),1)
 
             print('name: {}, xs: {} , ys: {} w: {} ,h: {}'.format(
