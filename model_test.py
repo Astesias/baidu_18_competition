@@ -205,10 +205,11 @@ if __name__ == "__main__":
     pcs(target=server_tasker,args=[server,port]).start()
     pcs(target=get_order,args=[Q_Order,server]).start()
 
+    print(os.getcwd())
     if len(sys.argv) > 1:
         system_config_path = sys.argv[1]
     else:
-        system_config_path = "dete_model/usb.json" #"../configs/detection/yolov3/image.json"
+        system_config_path = "./dete_model/usb.json" #"../configs/detection/yolov3/image.json"
 
     print("SystemConfig Path: {}".format(system_config_path))
     g_system_config = SystemConfig(system_config_path)

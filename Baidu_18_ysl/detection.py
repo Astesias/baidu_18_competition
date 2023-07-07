@@ -82,10 +82,12 @@ def predict(frame,g_model_config,g_predictor, timer=None):
 
     outputs = np.array(g_predictor.get_output(0))
 
-    outputs=outputs[np.argsort(-outputs[:, 1])] ######## sort result
+
+    
 
     res = list()
     if outputs.shape[1] == 6:
+        outputs=outputs[np.argsort(-outputs[:, 1])] ######## sort result
         for data in outputs:
             score = data[1]
             type_ = data[0]

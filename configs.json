@@ -2,18 +2,20 @@
   "port": 8080,
   "serial_bps": 115200,
   "serial_host": "/dev/ttyUSB0",
-  "model_dir": "/root/workspace/.test/face_model",
+  "model_dir": "/root/workspace/dete_model",
   "input_frame_size": [
-    128,
-    128
+    320,
+    320
   ],
+  "spray_index": 0,
+  "items_kind": "item2",
   "host": "192.168.53.121",
   "server": "http://192.168.53.121:8080",
-  "model_json": "/root/workspace/.test/face_model/usb_yolov3.json",
+  "model_json": "/root/workspace/dete_model/usb.json",
   "server_task": "/root/workspace/test/dj/mysite/sender.py",
   "main_task": "/root/workspace/Baidu_18_ysl/main.py",
   "videos": [
-    "/dev/video1",
-    "/dev/video0"
+    "/dev/video0",
+    "/dev/video1"
   ]
 }

@@ -8,7 +8,7 @@ def make_cfg():
         'serial_bps': 115200,
         'model_dir': os.path.abspath('./dete_model'),
         'model_json': 'usb.json',
-        'input_frame_size': (128, 128),
+        'input_frame_size': (320, 320),
         'server_task': './test/dj/mysite/sender.py',
         'main_task': './Baidu_18_ysl/main.py',
         'spray_index': 0,
@@ -42,6 +42,7 @@ def make_cfg():
                 videos.append('/dev/'+i)
           if not videos:
             print("Warning video not found")
+          videos.sort(key=lambda x:int(x[-1]))
           cfg.add('videos',videos)
        
           usbflag=False

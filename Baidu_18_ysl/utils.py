@@ -283,7 +283,9 @@ def check_cap(capl,**kw):
 def ser_read(ser):
     try:
       if ser.main_engine.inWaiting():
-          return ser.Read_Line()
+        return ser.Read_Line()
+      else:
+        return ''
     except:
       ser.main_engine.flushInput() 
       ser.main_engine.flushOutput() 

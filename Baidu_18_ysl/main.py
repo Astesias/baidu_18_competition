@@ -17,7 +17,7 @@ if os.name!='nt':
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
-def run(Q_order,cfg,open=False):
+def run(Q_order,cfg,open=False,swicth_init=None):
 
     h,w=cfg['input_frame_size']
     assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
@@ -48,7 +48,7 @@ def run(Q_order,cfg,open=False):
         #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
-        DISPLAYER,MODEL_CONFIG,PREDICTOR=[None,None,None]#detection_init(cfg['model_json'])
+        DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init(cfg['model_json'])
 
         classes=MODEL_CONFIG.labels
         # 0  bonfire            _
@@ -120,6 +120,9 @@ def run(Q_order,cfg,open=False):
 
         Start=False # 运行标志
         switch=False # 摄像头切换
+        if swicth_init:
+          swich=True
+          switch_content=swicth_init
         # loop_times=0 
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
@@ -142,7 +145,7 @@ def run(Q_order,cfg,open=False):
 
                 ################################## Segmentation
                 line_err=SegmentationRoad(cap1)
-                sprint(line_err + ('->' if line_err<0 else '<-'),
+                sprint(str(line_err) + ('->' if line_err<0 else '<-'),
                        T=T,ser=None,logger=logger_results,end='\n\r')
                 # post_data(cfg.server,f'S{line_info}')
                 sprint(f'[:{line_err}/]',T=T,ser=ser,logger=None,normal=False)
@@ -154,70 +157,71 @@ def run(Q_order,cfg,open=False):
                 if not switch:
                     results=PredictFrame(cap1)
                     result_from='cap1'
-                    kind,_=results[0]
-                    if kind in group_down and down_label_left[kind]:
-                        sprint(communicate_down_map[kind],T=T,ser=ser,logger=None)
-                        down_label_left[kind]=False
-                        print(f'Detetion view {classes[kind]}')
-                        if group_map[kind]:
-                            switch=not switch
-                            switch_content=kind
-                            print(f'Detetion switch {classes[kind]}')
+                    if results:
+                      kind,_=results[0]
+                      if kind in group_down and down_label_left[kind]:
+                          sprint(communicate_down_map[kind],T=T,ser=ser,logger=None)
+                          down_label_left[kind]=False
+                          print(f'Detetion view {classes[kind]}')
+                          if group_map[kind]:
+                              switch=not switch
+                              switch_content=kind
+                              print(f'Detetion switch {classes[kind]}')
                 else:
                     results=PredictFrame(cap2)
                     result_from='cap2'
                     results=[row for row in results if row in group_map[switch_content]]
                     
-
-                    if switch_content==1: # building
-                        if results:
-                            kind,_=results[0]
-                            print(f'Building {classes[kind]}')
-                            sprint(building_map[kind],T=T,ser=ser,logger=None)
-
-                    elif switch_content==7: # items
-                        target_kind=classes.index(cfg['items_kind'])
-                        item_cx={1:None,2:None,3:None}
-                        item_map={7:1,8:2,9:3}
-                        for result in results:
-                            kind,cx=result
-                            kind=item_map[kind]
-                            if item_cx[kind]!=None:
-                                item_cx[kind]=cx
-                        print('Items cxes:',list(item_cx.values()))
-
-                        if not item_cx[2]:
-                            print('Item not found item2')
-                            continue
-                        if not item_cx[target_kind]:
-                            print(f'Item not found target {classes[kind]}')
-                            continue
-
-                        center_err=item_cx[2]-item_cx[target_kind]
-                        err=w/2-item_cx[target_kind]
-                        print(f'Items [&{err:.0f}:{center_err:.0f}/]')
-                        sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
-
-                    elif switch_content==12: # spray
-                        target_index=cfg['spray_index']
-                        spray_cx=[]
-                        results.sort(key=lambda x:x[1])
-                        for result in results:
-                            _,cx=result
-                            spray_cx.append(cx)
-                        spray_cx.sort()
-                        print(f'Spray {spray_cx}')
-                        if len(spray_cx)!=3:
-                            print(f'Warning spray num = {len(spray_cx)} instead of 3')
-                        if len(spray_cx)<2:
-                            print(f'Warning spray num = {len(spray_cx)} contiune')
-                        
-                        target_index=target_index if target_index<=1 else -1 # 0 1 -1
-                        target_cx=spray_cx[target_index]
-                        err=w/2-target_cx
-                        print(f'Spray [*{err:.0f}/]')
-                        sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
-                        pass
+                    if results:
+                      if switch_content==1: # building
+                          
+                          kind,_=results[0]
+                          print(f'Building {classes[kind]}')
+                          sprint(building_map[kind],T=T,ser=ser,logger=None)
+  
+                      elif switch_content==7: # items
+                          target_kind=classes.index(cfg['items_kind'])
+                          item_cx={1:None,2:None,3:None}
+                          item_map={7:1,8:2,9:3}
+                          for result in results:
+                              kind,cx=result
+                              kind=item_map[kind]
+                              if item_cx[kind]!=None:
+                                  item_cx[kind]=cx
+                          print('Items cxes:',list(item_cx.values()))
+  
+                          if not item_cx[2]:
+                              print('Item not found item2')
+                              continue
+                          if not item_cx[target_kind]:
+                              print(f'Item not found target {classes[kind]}')
+                              continue
+  
+                          center_err=item_cx[2]-item_cx[target_kind]
+                          err=w/2-item_cx[target_kind]
+                          print(f'Items [&{err:.0f}:{center_err:.0f}/]')
+                          sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
+  
+                      elif switch_content==12: # spray
+                          target_index=cfg['spray_index']
+                          spray_cx=[]
+                          results.sort(key=lambda x:x[1])
+                          for result in results:
+                              _,cx=result
+                              spray_cx.append(cx)
+                          spray_cx.sort()
+                          print(f'Spray {spray_cx}')
+                          if len(spray_cx)!=3:
+                              print(f'Warning spray num = {len(spray_cx)} instead of 3')
+                          if len(spray_cx)<2:
+                              print(f'Warning spray num = {len(spray_cx)} contiune')
+                          
+                          target_index=target_index if target_index<=1 else -1 # 0 1 -1
+                          target_cx=spray_cx[target_index]
+                          err=w/2-target_cx
+                          print(f'Spray [*{err:.0f}/]')
+                          sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
+                          pass
 
                     if 'done' in ser_read(ser):
                         switch=not switch
