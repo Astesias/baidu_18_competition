@@ -1,4 +1,4 @@
-# -*- coding:utf-8 ±àÂë²âÊÔ
+# -*- coding:utf-8 ç¼–ç æµ‹è¯•
 import os
 import sys
 import cv2
@@ -29,25 +29,25 @@ def run(Q_order,cfg,open=False):
     assert 'main.py' in os.listdir() , 'work directory is not correct :{os.getcwd()}'
     os.mkdir(log_dir)
 
-    #logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'))         # gpioÊä³ö
-    logger_results =Fplog(os.path.join(log_dir,'results.txt'))      # Ô¤²â½á¹ûÊä³ö
-    logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'))     # Ñ­»·¼ÆÊ±
-    logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'))     # Ä£ĞÍÔËĞĞ
+    #logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'))         # gpioè¾“å‡º
+    logger_results =Fplog(os.path.join(log_dir,'results.txt'))      # é¢„æµ‹ç»“æœè¾“å‡º
+    logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'))     # å¾ªç¯è®¡æ—¶
+    logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'))     # æ¨¡å‹è¿è¡Œ
     logger_list=[logger_results,logger_looptime,logger_modelrun]
 
     try:
-        T=time.time() # ×Ü¼ÆÊ±
-        timeit=Timeit('Initialization') # ¿ªÊ¼³õÊ¼»¯
+        T=time.time() # æ€»è®¡æ—¶
+        timeit=Timeit('Initialization') # å¼€å§‹åˆå§‹åŒ–
         
-        cap1 = cv2.VideoCapture(cfg['videos'][0],cv2.CAP_V4L) # Ç°ÉãÏñÍ·
-        cap2 = cv2.VideoCapture(cfg['videos'][1],cv2.CAP_V4L) # ±ßÉãÏñÍ·
-        #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # ÓÒÉãÏñÍ·
+        cap1 = cv2.VideoCapture(cfg['videos'][0],cv2.CAP_V4L) # å‰æ‘„åƒå¤´
+        cap2 = cv2.VideoCapture(cfg['videos'][1],cv2.CAP_V4L) # è¾¹æ‘„åƒå¤´
+        #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # å³æ‘„åƒå¤´
         caplist=[cap1,cap2]#cap2,cap3]
-        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # ÉèÖÃÊÓÆµÁ÷´óĞ¡
+        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # è®¾ç½®è§†é¢‘æµå¤§å°
         mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
         #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
 
-        global MODEL_CONFIG,PREDICTOR,DISPLAYER # ³õÊ¼»¯¼ì²âÆ÷
+        global MODEL_CONFIG,PREDICTOR,DISPLAYER # åˆå§‹åŒ–æ£€æµ‹å™¨
         DISPLAYER,MODEL_CONFIG,PREDICTOR=[None,None,None]#detection_init(cfg['model_json'])
 
         classes=MODEL_CONFIG.labels
@@ -86,18 +86,18 @@ def run(Q_order,cfg,open=False):
                         2:'[$1/]',3:'[$2/]',4:'[$3/]'
                      }
 
-        # @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # Ä¿±ê¼ì²â
+        # @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # ç›®æ ‡æ£€æµ‹
         def PredictFrame(cap,display=False):
             _,frame=cap.read()
             if not _:
                 raise IOError('Device bandwidth beyond')
             result = predict(frame,MODEL_CONFIG,PREDICTOR)
-            if display: # ¿ÉÊÓ»¯µ÷ÊÔ
+            if display: # å¯è§†åŒ–è°ƒè¯•
                 drawResults(frame,result,MODEL_CONFIG)
                 DISPLAYER.putFrame(frame)
             return mmap('unpack',result,arg=[MODEL_CONFIG.labels])
 
-        #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # Í¼Ïñ·Ö¸î
+        #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # å›¾åƒåˆ†å‰²
         def SegmentationRoad(cap,display=False):
             _,frame=cap.read()
             nonlocal order
@@ -113,15 +113,15 @@ def run(Q_order,cfg,open=False):
         
 
 
-        timeit.out('Mainloop',logger=logger_modelrun,T=T) # ¿ªÊ¼Ö÷Ñ­»·
+        timeit.out('Mainloop',logger=logger_modelrun,T=T) # å¼€å§‹ä¸»å¾ªç¯
 
-        # timer_predict=Timer(0.05) # ×î¶à0.05sÊ¶±ğÒ»´Î
-        # timer_loop=Timer(5) # Ñ­»·log×î¶à5sÊä³öÒ»´Î
+        # timer_predict=Timer(0.05) # æœ€å¤š0.05sè¯†åˆ«ä¸€æ¬¡
+        # timer_loop=Timer(5) # å¾ªç¯logæœ€å¤š5sè¾“å‡ºä¸€æ¬¡
 
-        Start=False # ÔËĞĞ±êÖ¾
-        switch=False # ÉãÏñÍ·ÇĞ»»
+        Start=False # è¿è¡Œæ ‡å¿—
+        switch=False # æ‘„åƒå¤´åˆ‡æ¢
         # loop_times=0 
-        check_cap(caplist,T=T,logger=logger_modelrun) # ¼ì²âÉãÏñÍ·×´Ì¬
+        check_cap(caplist,T=T,logger=logger_modelrun) # æ£€æµ‹æ‘„åƒå¤´çŠ¶æ€
         while True:
             
             #############
@@ -135,7 +135,7 @@ def run(Q_order,cfg,open=False):
             #     Start=False
             #############
 
-            # t=time.time() # Ñ­»·¿ªÊ¼¼ÆÊ±
+            # t=time.time() # å¾ªç¯å¼€å§‹è®¡æ—¶
             # loop_times+=1 
 
             if Start:
@@ -223,7 +223,7 @@ def run(Q_order,cfg,open=False):
                         switch=not switch
                         print(f'Detetion switch out from {classes[kind]}')
 
-            if T-time.time()>(10*60): # ·ÀËÀ»ú
+            if T-time.time()>(10*60): # é˜²æ­»æœº
                 raise TimeoutError
 
             # if timer_loop.T():
@@ -239,7 +239,7 @@ def run(Q_order,cfg,open=False):
         print(traceback.format_exc())
 
     finally:
-        mmap('release',caplist) # ÊÍ·Å×ÊÔ´
+        mmap('release',caplist) # é‡Šæ”¾èµ„æº
         mmap('close',logger_list)
 
 
