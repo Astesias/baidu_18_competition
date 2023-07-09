@@ -283,7 +283,9 @@ def check_cap(capl,**kw):
 def ser_read(ser):
     try:
       if ser.main_engine.inWaiting():
-        return ser.Read_Line()
+        s=str(ser.Read_Line(),'utf8').strip('\r\n')
+        print(f'serial recv {s}')
+        return s
       else:
         return ''
     except:
@@ -296,8 +298,12 @@ def quene_get(Q):
         return Q.get()
     
 def order_respone(order,frame):
+
     if order=='update':
-        cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
+      from mask2angle3 import core
+      frame=core(frame,debug=True)
+      cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
+
 
 from pysl import easy_request
 def post_data(server,data):

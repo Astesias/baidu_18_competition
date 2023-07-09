@@ -16,7 +16,7 @@ global window_size,previous_outputs,lower_thd,higher_thd,cut_piece,piece,height,
 
 height,width=450,640
 
-piece=400
+piece=150
 cut_piece=height//piece
 
 window_size = 4
@@ -67,7 +67,7 @@ def draw_rotate(img,center,rotate,color,thick=2,length=50):
     p2=int(midx+length*sin(rotate/180*pi)),int(midy-length*cos(rotate/180*pi))
     cv2.line(img,p2,p1,color,thick)
 
-def core(img=None,file=None,show=False):
+def core(img=None,file=None,show=False,debug=False):
     assert file or isinstance(img,np.ndarray)
     if file:
         img = cv2.imread(file)
@@ -87,6 +87,7 @@ def core(img=None,file=None,show=False):
     target_rotate=None      # ¹Ì¶¨½Ç¶È
     # last_top=last_lr=None
     
+    box_num=0
     for ct in range(cut_piece):
         mask = cv2.inRange(hsv[-(ct+1)*piece-1:-(ct)*piece-1], lower_thd, higher_thd)
         contours=get_contours(mask)
@@ -145,7 +146,11 @@ def core(img=None,file=None,show=False):
                 # if cnt_contour>=4 and w>h:
                 #     cv2.drawContours(img, [contour], -1, (102, 204, 255), 2)
                 #     continue
-                
+                if  w>h:
+                    cv2.drawContours(img, [contour], -1, (102, 204, 255), 2)
+                    continue
+
+              
                 cv2.drawContours(img, [contour], -1, (255, 255, 0), 2) # ÄÚ¿ò
     
                 rotate=linear_regression(contour[:,1],contour[:,0])[1]
@@ -180,6 +185,7 @@ def core(img=None,file=None,show=False):
                                (255,0,0) if not lr else (0,0,255),2) # Íâ¿ò À¶×óºìÓÒ
                 cv2.putText(img,'{}'.format(ct),(x+(20 if x<width/2 else -20),y+(40 if y<height/2 else -40)),
                             cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255))
+                box_num+=1
                  
                 cxes.append(x+w/2)
                 rotates=np.append(rotates,rotate)
@@ -228,11 +234,11 @@ def core(img=None,file=None,show=False):
             rotate-=(width-cxavg)/320*30
             mode=1
         elif not has_right:
-            rotate+=cxavg/320*30
+            rotate+=(width/2-cxavg)/320*30/2
             mode=2
         else:
             # printf(rotate,1)
-            rotate-=(cxavg_half)/10
+            rotate-=(cxavg_half)/10#*(box_num/4)
             # printf(rotate,2)
             mode=3
             
@@ -246,7 +252,7 @@ def core(img=None,file=None,show=False):
 
         
     printf(f'mode {mode}')
-    
+    printf(f'res {rotate:.0f} '+('->' if rotate>0 else '<-'))
     
     midx,midy=int(width/2),int(height/2)
     draw_rotate(img_,(midx,midy),rotate,(200,255,200),4)
@@ -266,6 +272,8 @@ def core(img=None,file=None,show=False):
             cv2.waitKey(24)
         
     printf('\n')
+    if debug:
+      return img_
     return rotate
 
 

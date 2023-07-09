@@ -6,6 +6,7 @@ import time
 import traceback
 import numpy as np
 from pprint import pprint
+from threading import Thread
 from pysl import Config,truepath,mute_all
 
 from mask2angle3 import core
@@ -43,8 +44,8 @@ def run(Q_order,cfg,open=False,switch_init=None):
         cap2 = cv2.VideoCapture(cfg['videos'][1],cv2.CAP_V4L) # 边摄像头
         #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
         caplist=[cap1,cap2]#cap2,cap3]
-        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
-        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
+        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
+        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
         #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
@@ -86,9 +87,12 @@ def run(Q_order,cfg,open=False,switch_init=None):
                         2:'[$1/]',3:'[$2/]',4:'[$3/]'
                      }
 
-        # @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 目标检测
-        def PredictFrame(cap,display=False):
-            _,frame=cap.read()
+        #@Timety(timer=Timer(0.5),ser=None,logger=logger_modelrun,T=T) # 目标检测
+        def PredictFrame(cap=None,display=False,frame=None):
+            if not isinstance(frame,np.ndarray):
+                _,frame=cap.read()
+            else:
+                _ = True
             nonlocal h,w
             frame=cv2.resize(frame,(h,w))
             if not _:
@@ -102,6 +106,8 @@ def run(Q_order,cfg,open=False,switch_init=None):
         #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
         def SegmentationRoad(cap,display=False):
             _,frame=cap.read()
+            global predict_frame
+            predict_frame=frame.copy()
             nonlocal order
             order_respone(order,frame=frame)
             #with mute_all():
@@ -109,15 +115,14 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if display:
                 frame=display_angle(frame,angle)
                 DISPLAYER.putFrame(frame)
-                
-            return round(-angle)
+            return round(-angle),predict_frame
         
         
 
 
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
-        # timer_predict=Timer(0.05) # 最多0.05s识别一次
+        timer_predict=Timer(1) # 最多1s识别一次
         # timer_loop=Timer(5) # 循环log最多5s输出一次
 
         Start=False # 运行标志
@@ -136,6 +141,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if not (Start or 'start' in ser_read(ser) or order=='run' or len(sys.argv)==2 or open):
                 continue
             else:
+                #Thread(target=SegmentationRoad,args=[cap1]).start()
                 Start=True
             # if order=='exit':
             #     Start=False
@@ -147,18 +153,21 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if Start:
 
                 ################################## Segmentation
-                line_err=SegmentationRoad(cap1)
-                sprint(str(line_err) + ('->' if line_err<0 else '<-'),
-                       T=T,ser=None,logger=logger_results,end='\n\r')
+                line_err,predict_frame=SegmentationRoad(cap1)
+                sprint(f'[:{line_err:.0f}/]',T=T,ser=ser,logger=None,normal=False)
+                
+                #sprint(str(line_err) + ('->' if line_err<0 else '<-'),
+                #       T=T,ser=None,logger=logger_results,end='\n\r')
+                
                 # post_data(cfg.server,f'S{line_info}')
-                sprint(f'[:{line_err}/]',T=T,ser=ser,logger=None,normal=False)
-
-
-            # if timer_predict.T():   
+                #ser.Send_data( '[:30\]'.encode('utf8'))
+                #continue
+             
+            if timer_predict.T():   
                 
                 ################################## Detection
                 if not switch:
-                    results=PredictFrame(cap1)
+                    results=PredictFrame(frame=predict_frame)
                     result_from='cap1'
                     if results:
                       kind,_=results[0]
@@ -200,7 +209,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                                     results[index][0]=rkind
 
                                     print(f'auto replace: {classes[okind]} -> {classes[rkind]}')
-                            
+                            print(results)
                             sum_cx=0
                             for index,result in enumerate(results):
                                 kind,cx=result
@@ -212,7 +221,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                             
                             err=err if abs(err)>20 else 0
                             center_err=center_err if abs(center_err)>20 else 0
-                            sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
+                            sprint(f'[&{-err:.0f}:{-center_err:.0f}/]',T=T,ser=ser,logger=None)
 
 
 
@@ -297,4 +306,4 @@ if __name__=='__main__':
         from multiprocessing import Queue 
         Q_Order=Queue(maxsize=5)
         #run(Q(),Config(truepath(__file__,'../configs.json')).data)
-        run(Q_Order,Config(truepath(__file__,'../configs.json')))
+        run(Q_Order,Config(truepath(__file__,'../configs.json')),1)
