@@ -119,9 +119,9 @@ def core(img=None,file=None,show=False,debug=False):
                 all_cxes.append(x+w/2)
     
                 
-                # if width/2-60<x+w/2<width/2+60 and w<120:
-                #     cv2.drawContours(img, [contour], -1, (255, 255, 255), 2)
-                #     continue
+                if width/2-60<x+w/2<width/2+60 and w<120:
+                     cv2.drawContours(img, [contour], -1, (255, 255, 255), 2)
+                     continue
                 # if area>28000: 
                 #     cv2.drawContours(img, [contour], -1, (255, 0, 255), 2)
                 #     if x>width/2:
@@ -152,12 +152,12 @@ def core(img=None,file=None,show=False,debug=False):
                     continue
 
               
-                cv2.drawContours(img, [contour], -1, (255, 255, 0), 2) # ÄÚ¿ò
+           
     
                 rotate=linear_regression(contour[:,1],contour[:,0])[1]
                 rotate=-np.arctan(rotate)*180/np.pi
                 #printf(f'A {rotate:.0f}')
-                draw_rotate(img,center,rotate,(225,0,225),length=35) # rotate
+             
                 
                 lr=None
                 # if w>h:
@@ -181,11 +181,7 @@ def core(img=None,file=None,show=False,debug=False):
                 #         has_right=True
                 #     else:
                 #         has_left=True
-                        
-                cv2.rectangle(img, (x, y), (right, bottom),
-                               (255,0,0) if not lr else (0,0,255),2) # Íâ¿ò À¶×óºìÓÒ
-                cv2.putText(img,'{}'.format(ct),(x+(20 if x<width/2 else -20),y+(40 if y<height/2 else -40)),
-                            cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255))
+
                 box_num+=1
                  
                 cxes.append(x+w/2)
@@ -217,10 +213,10 @@ def core(img=None,file=None,show=False,debug=False):
             cxavg_half=(width-hr/cr)-hl/cl
             cxavg_half-=20                       ##^^^^^^^
             printf(f'half: {cxavg_half:.0f}')
-            drewlinecross(img_,int((hr/cr+hl/cl)/2),color=(255,255,255))
+    
             
         printf(f'cxavg: {cxavg:.0f}')
-        drewlinecross(img_,int(cxavg),color=(0,0,0))
+     
     
         if not has_left and not has_right:
             cxavg=sum(all_cxes)/len(all_cxes) if all_cxes else 0
@@ -256,22 +252,8 @@ def core(img=None,file=None,show=False,debug=False):
     printf(f'mode {mode}')
     printf(f'res {rotate:.0f} '+('->' if rotate>0 else '<-'))
     
-    midx,midy=int(width/2),int(height/2)
-    draw_rotate(img_,(midx,midy),rotate,(200,255,200),4)
-    cv2.putText(img_,'{:^5.1f}'.format(abs(rotate)),(midx+20,midy),
-                cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255) if rotate>0 else (255,0,255)) # total rotate
-    if display:
-        global display_mode
-        if display_mode==1:
-            cv2.imshow('1',img_)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-        elif display_mode==2:
-            cv2.imshow('1',img_)
-            cv2.waitKey(0)
-        elif display_mode==3:
-            cv2.imshow('1',img_)
-            cv2.waitKey(24)
+
+
         
     printf('\n')
     if debug:

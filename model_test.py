@@ -1,6 +1,6 @@
 from multiprocessing import Process as pcs
 from multiprocessing import Queue 
-from pysl import Config,os_enter,easy_request,mmap,mute_all
+from pysl import Config,os_enter,easy_request,mmap,mute_all,drewlinecross
 import os,config_make,time,sys
 from pprint import pprint
 import numpy as np
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     timer = Timer("Predict", 100)
 
     cap1=cv2.VideoCapture(cfg.videos[0],cv2.CAP_V4L)
-    cap2=cv2.VideoCapture(cfg.videos[1],cv2.CAP_V4L)
+    cap2=cv2.VideoCapture(cfg.videos[1])
     caps=[cap1,cap2]
     mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_WIDTH, 320]) 
     mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_HEIGHT,320])
@@ -233,7 +233,7 @@ if __name__ == "__main__":
         print("Error!!! predictor init failed .")
         sys.exit(-1)
 
-    read_cap=0
+    read_cap=1
     update_frame=False
 
     try:
@@ -245,20 +245,24 @@ if __name__ == "__main__":
                 elif order=='update':
                     update_frame=True
                     
-
             _,frame=caps[read_cap].read()
-            frame=cv2.resize(frame,(320,320))
+            print('read')
+            frame=cv2.resize(frame,(160,160))
             origin_frame = frame.copy()
 
             predict_result = predict(origin_frame, timer)
+            print('predict')
 
             # if g_system_config.predict_log_enable:
             #     printResults(origin_frame, predict_result)
             if update_frame:
+                print('update')
                 update_frame=False
                 drawResults(origin_frame, predict_result)
                 os.remove('test/dj/mysite/static/img/tmp.jpg')
+                drewlinecross(origin_frame,80,lineWidth=1)
                 cv2.imwrite('test/dj/mysite/static/img/tmp.jpg',origin_frame)
+                print('write')
                 # display.putFrame(origin_frame)
     except:
         import traceback

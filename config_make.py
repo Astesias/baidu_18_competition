@@ -8,11 +8,12 @@ def make_cfg():
         'serial_bps': 115200,
         'model_dir': os.path.abspath('./dete_model'),
         'model_json': 'usb.json',
-        'input_frame_size': (320, 320),
+        'input_frame_size': (96, 96),
         'server_task': './test/dj/mysite/manage.py',
         'main_task': './Baidu_18_ysl/main.py',
-        'spray_index': 2,
-        'items_kind': 'item1'
+        'spray_index': 2,  # [0,1,2]
+        'items_kind': 'item2', # [item1,item2,item3]
+        'item_index': 0  # [0,1,2]
     }
 
     with Config('./configs.json', base=config) as cfg:
@@ -27,6 +28,7 @@ def make_cfg():
 
         cfg.add('spray_index')
         cfg.add('items_kind')
+        cfg.add('item_index')        
 
         cfg.add('host', getip()[0])
         cfg.add('server', f'http://{getip()[0]}:'+str(cfg.port))

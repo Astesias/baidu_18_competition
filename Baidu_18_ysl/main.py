@@ -9,7 +9,7 @@ from pprint import pprint
 from threading import Thread
 from pysl import Config,truepath,mute_all
 
-from mask2angle3 import core
+from mask2angle4 import core
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
@@ -22,6 +22,9 @@ def run(Q_order,cfg,open=False,switch_init=None):
 
     h,w=map(int,cfg['input_frame_size'])
     assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
+    
+    item_index=cfg['item_index']
+    
   
     serial_host,serial_bps=cfg['serial_host'],cfg['serial_bps']
     ser=Serial_init(serial_host,serial_bps,0.5)
@@ -44,14 +47,17 @@ def run(Q_order,cfg,open=False,switch_init=None):
         cap2 = cv2.VideoCapture(cfg['videos'][1],cv2.CAP_V4L) # 边摄像头
         #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
         caplist=[cap1,cap2]#cap2,cap3]
-        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
-        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
+        mmap('set',[cap1],arg=[cv2.CAP_PROP_FRAME_WIDTH, 160]) # 设置视频流大小
+        mmap('set',[cap1],arg=[cv2.CAP_PROP_FRAME_HEIGHT,160])
+        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_WIDTH, 160]) # 设置视频流大小
+        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_HEIGHT,160])
         #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
         DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init(cfg['model_json'])
 
         classes=MODEL_CONFIG.labels
+        #print(classes)
         # 0  bonfire            _
         # 1  building           _
         # 2  building_blue 
@@ -68,8 +74,9 @@ def run(Q_order,cfg,open=False,switch_init=None):
         # 13 vortex             _
         # [0 1 5 6 11 12]
         
-        group_down=[0,1,5,6,10,12,13]
-        down_label_left=[True for _ in range(len(group_down))]
+        group_down=     [0,1,5   ,6,10,12,13]
+        down_label_left=[1,3,9999,1,1, 1,  3]
+        building_left=[1,1,1]
         # group_up=[2,3,4,7,8,9,11]
         group_map={
                     0:None,
@@ -81,7 +88,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                     13:None
                   }
         communicate_down_map={
-                            1:'[@1/]',10:'[@2/]',0:'[@3/]',6:'[@4/]',12:'[@5/]',13:'[@6/]'
+                            1:'[@1/]',10:'[@2/]',0:'[@3/]',6:'[@4/]',12:'[@5/]',13:'[@6/]',5:''
                              }
         building_map={
                         2:'[$1/]',3:'[$2/]',4:'[$3/]'
@@ -93,8 +100,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                 _,frame=cap.read()
             else:
                 _ = True
-            nonlocal h,w
-            frame=cv2.resize(frame,(h,w))
+            frame=cv2.resize(frame,(160,160))
             if not _:
                 raise IOError('Device bandwidth beyond')
             result = predict(frame,MODEL_CONFIG,PREDICTOR)
@@ -106,32 +112,34 @@ def run(Q_order,cfg,open=False,switch_init=None):
         #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
         def SegmentationRoad(cap,display=False):
             _,frame=cap.read()
-            global predict_frame
+            frame=cv2.resize(frame,(640,480))
+            nonlocal predict_frame
             predict_frame=frame.copy()
             nonlocal order
             order_respone(order,frame=frame)
-            #with mute_all():
-            angle=core(frame)
+            with mute_all():
+                angle=core(frame)
             if display:
                 frame=display_angle(frame,angle)
                 DISPLAYER.putFrame(frame)
             return round(-angle),predict_frame
         
-        
-
 
         timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
 
         timer_predict=Timer(1) # 最多1s识别一次
-        # timer_loop=Timer(5) # 循环log最多5s输出一次
+        timer_vortex=Timer(3) # 环岛最多3s一次
 
         Start=False # 运行标志
         switch=False # 摄像头切换
-        #print(switch_init)
+        put_flag=False
         if switch_init:
-          switch=True
-          switch_content=switch_init
-        # loop_times=0 
+            switch=True
+            switch_content=switch_init
+        vortex_seek=0
+        vortex_time=0
+        green_cnt=0  
+            
         check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
         while True:
             
@@ -153,8 +161,9 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if Start:
 
                 ################################## Segmentation
-                line_err,predict_frame=SegmentationRoad(cap1)
-                sprint(f'[:{line_err:.0f}/]',T=T,ser=ser,logger=None,normal=False)
+                if not vortex_time:
+                    line_err,predict_frame=SegmentationRoad(cap1)
+                    sprint(f'[:{line_err:.0f}/]',T=T,ser=ser,logger=None,normal=False)
                 
                 #sprint(str(line_err) + ('->' if line_err<0 else '<-'),
                 #       T=T,ser=None,logger=logger_results,end='\n\r')
@@ -168,29 +177,72 @@ def run(Q_order,cfg,open=False,switch_init=None):
                 ################################## Detection
                 if not switch:
                     results=PredictFrame(frame=predict_frame)
+                    #continue
                     result_from='cap1'
                     if results:
                       kind,_=results[0]
-                      if kind in group_down and down_label_left[kind]:
+                      if kind in group_down and down_label_left[group_down.index(kind)] and kind!=5:
                           sprint(communicate_down_map[kind],T=T,ser=ser,logger=None)
-                          down_label_left[kind]=False
+                          down_label_left[group_down.index(kind)]-=1
                           print(f'Detetion view {classes[kind]}')
-                          if group_map[kind]:
+                          if group_map[kind] and kind!=13:
+                              h_,w_=h,w
+                              h,w=160,160
                               switch=not switch
                               switch_content=kind
                               print(f'Detetion switch {classes[kind]}')
+                              ser_read(ser) # flush input
+                              tmp_T=timer_predict.sep
+                              if kind==1:
+                                  time.sleep(2)
+                              
+                          elif kind==13 or vortex_time:
+                              
+                              if timer_vortex.T() and down_label_left[group_down.index(kind)]:
+                                  vortex_seek+=1
+                                  print(f'Seek vortex at {vortex_seek} time')
+                                  if vortex_seek==1:
+                                      vortex_time==10000
+                                      print('vortex_time start')
+                                  elif vortex_seek==2:
+                                      pass
+                                  elif vortex_seek==3:
+                                      vortex_time==20
+                              else:
+                                  vortex_time-=1
+                                  if vortex_seek<=2:
+                                      if vortex_seek>=9900:
+                                          print('line',end=' ')
+                                          sprint(f'[:0/]',T=T,ser=ser,logger=None,normal=True)
+                                      else:
+                                          print('round',end=' ')
+                                          sprint(f'[:40/]',T=T,ser=ser,logger=None,normal=True)
+                                  elif vortex_seek==3:
+                                      vortex_time=0
+                                      print('vortex_time end')
+                                      sprint(f'[:40/]',T=T,ser=ser,logger=None,normal=True)
+                              
+                          
                 else:
+                    timer_predict.sep=0
+                    
                     results=PredictFrame(cap2)
                     result_from='cap2'
                     results=[row for row in results if row[0] in group_map[switch_content]]
                     print(results)
                     
-                    if results:
+                    if results or put_flag:
                       if switch_content==1: # building
-                            
-                            kind,_=results[0]
-                            print(f'Building {classes[kind]}')
-                            sprint(building_map[kind],T=T,ser=ser,logger=None)
+                            if kind==4:
+                                green_cnt+=1
+                            if kind!=4 or green_cnt>7:
+                                kind,_=results[0]
+                                if building_left[kind-2]:
+                                    building_left[kind-2]-=1
+                                    print(f'Building {classes[kind]}')
+                                    sprint(building_map[kind],T=T,ser=ser,logger=None)
+                                else:
+                                    print(classes[kind],'was found')
   
                       elif switch_content==10: # items
                             target_kind=classes.index(cfg['items_kind'])
@@ -210,47 +262,46 @@ def run(Q_order,cfg,open=False,switch_init=None):
 
                                     print(f'auto replace: {classes[okind]} -> {classes[rkind]}')
                             print(results)
+                            
                             sum_cx=0
+                            target_flag=False
                             for index,result in enumerate(results):
                                 kind,cx=result
                                 sum_cx+=cx
                                 if target_kind==kind:
-                                    err=w/2-cx
-                            avg_cx=sum_cx/len(results)
-                            center_err=w/2-avg_cx
+                                    err=(cx-3)-w/2
+                                    target_flag=True
                             
-                            err=err if abs(err)>20 else 0
-                            center_err=center_err if abs(center_err)>20 else 0
-                            sprint(f'[&{-err:.0f}:{-center_err:.0f}/]',T=T,ser=ser,logger=None)
-
-
-
-                        #   item_cx={1:None,2:None,3:None}
-                        #   item_map={7:1,8:2,9:3}
-                        #   for result in results:
-                        #       kind,cx=result
-                        #       kind=item_map[kind]
-                        #       if item_cx[kind]==None:
-                        #           item_cx[kind]=cx
-                        #   print('Items cxes:',list(item_cx.values()))
-  
-                        #   if not item_cx[2]:
-                        #       print('Item not found item2')
-                        #       continue
-                        #   if not item_cx[kind]:
-                        #       print(f'Item not found target {classes[kind]}')
-                        #       continue
-  
-                        #   if item_cx[item_map[target_kind]]:                         
-                        #     center_err=item_cx[2]-(item_cx[item_map[target_kind]])
-                        #   else:
-                        #     if item_map[target_kind]==1:
-                              
-                        #   err=w/2-item_cx[item_map[target_kind]]
-                          
-                        #   if abs(err)<10:
-                        #     err=center_err=0
-                        #   sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
+                            
+                            avg_cx=sum_cx/len(results) if len(results) else w/2
+                            center_err=avg_cx-w/2
+                            
+                            if not target_flag:
+                                err=3
+                            else:
+                                err=err if abs(err)>3 else 0
+                                
+                            if not put_flag:
+                                center_err=center_err if abs(center_err)>20 else 0
+                            else:
+                                if item_index==2:
+                                    if len(results)==0:
+                                        center_err=-3
+                                    else:
+                                        center_err=results[-1][1]-w/2
+                                if item_index==1:
+                                    center_err=0
+                                    
+                                if item_index==0:
+                                    if len(results)==0:
+                                        center_err=3
+                                    else:
+                                        center_err=results[0][1]-w/2
+                            if err==0 and not put_flag:
+                                print('| | | | | | | | | | | |\n| | Reach the item  | |\n| | | | | | | | | | | |')
+                            if put_flag and center_err==0:
+                                print('| | | | | | | | | | | |\n| | Put the item    | |\n| | | | | | | | | | | |')
+                            sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
   
                       elif switch_content==12: # spray
                           target_index=cfg['spray_index']
@@ -274,9 +325,16 @@ def run(Q_order,cfg,open=False,switch_init=None):
                           sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
                           pass
 
-                    if 'done' in ser_read(ser):
+                    msg=ser_read(ser)
+                    if 'done' in msg:
                         switch=not switch
                         print(f'Detetion switch out from {classes[kind]}')
+                        timer_predict.sep=tmp_T
+                        h,w=h_,w_
+                        put_flag=False
+                    elif 'ok' in msg:
+                        put_flag=True
+                        
 
             if T-time.time()>(10*60): # 防死机
                 raise TimeoutError

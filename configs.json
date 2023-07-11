@@ -4,13 +4,14 @@
   "serial_host": "/dev/ttyUSB0",
   "model_dir": "/root/workspace/dete_model",
   "input_frame_size": [
-    320,
-    320
+    96,
+    96
   ],
   "spray_index": 2,
-  "items_kind": "item1",
-  "host": "192.168.53.121",
-  "server": "http://192.168.53.121:8080",
+  "items_kind": "item2",
+  "item_index": 0,
+  "host": "192.168.244.121",
+  "server": "http://192.168.244.121:8080",
   "model_json": "/root/workspace/dete_model/usb.json",
   "server_task": "/root/workspace/test/dj/mysite/manage.py",
   "main_task": "/root/workspace/Baidu_18_ysl/main.py",
