@@ -42,9 +42,11 @@ def get_order(Q_Order,server):
 def main_tasker(Q_Order,cfg):
     os.chdir('./Baidu_18_ysl')
     sys.path.insert(0,'./')
-    from main import run
-    run(Q_Order,cfg,True)
-
+    from main_pcs import run
+    task=[]
+    print('Note: Start with Tasker.py , main project use main_pcs.py')
+    print('Note: Tasker with task',(*task,) if task else 'None')
+    run(Q_Order,cfg,True,*task)
 
 def data_poster(server):
     n=1
@@ -58,8 +60,9 @@ def data_poster(server):
 
 
 if __name__=='__main__':
-    pcs(target=server_tasker,args=[server,port]).start()
-    pcs(target=get_order,args=[Q_Order,server]).start()
+    if len(sys.argv)!=2:
+        pcs(target=server_tasker,args=[server,port]).start()
+        pcs(target=get_order,args=[Q_Order,server]).start()
 
     if os.name!='nt':
         pcs(target=main_tasker,args=[Q_Order,cfg]).start()

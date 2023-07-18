@@ -91,20 +91,22 @@ if __name__=='__main__':
    print()
    Engine1 = Communication("/dev/ttyUSB0",115200,5)
    #Engine1.Recive_data(1)
-   if (Ret):
-     print('\n')
-     while 1:
-       s='Hello'
-       print('send',s)
-       Engine1.Send_data((s+'\n').encode('utf8'))
-       
-       aa=Engine1.Read_Line()
-       if aa:
-         print(str(aa,'utf8').strip('\r\n'))
-       
-       time.sleep(1)
-       print('__')
-  
+#   if (Ret):
+#     print('\n')
+#     while 1:
+#       s='Hello'
+#       print('send',s)
+#       Engine1.Send_data((s+'\n').encode('utf8'))
+#       
+#       aa=Engine1.Read_Line()
+#       if aa:
+#         print(str(aa,'utf8').strip('\r\n'))
+#       
+#       time.sleep(1)
+#       print('__')
+   while 1:
+        Engine1.Send_data(('[@1/]'+'\n').encode('utf8')) # '[:40/]'
+        time.sleep(0.05)
   
   
   

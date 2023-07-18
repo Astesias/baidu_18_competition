@@ -39,6 +39,9 @@ class PredictResult(object):
         self.width = int(width)
         self.height = int(height)
 
+def predictresult(type_, score, x, y, width, height):
+    return [int(type_),int(x)+int(width/2)] #int(x),int(y),int(width),int(height)
+
 def predictorInit():
     """predictor config and initialization"""
     global g_model_config
@@ -60,22 +63,20 @@ def predictorInit():
         return -1
 
 
-IS_FIRST_RUN = True
-
-
-def predict(frame, timer):
+def predict(frame,g_model_config,g_predictor, timer=None):
     """predict with paddlelite and postprocess"""
     origin_frame  = frame.copy()
     origin_h, origin_w, _ = origin_frame.shape
 
-    
-    if not g_system_config.use_fpga_preprocess:
-        input_data = cpu_preprocess(frame, g_model_config)
-        g_predictor.set_input(input_data, 0)
-    else:
-        input_tensor = g_predictor.get_input(0)
-        fpga_preprocess(frame, input_tensor, g_model_config)
 
+    # if not g_system_config.use_fpga_preprocess:
+    #     input_data = cpu_preprocess(frame, g_model_config)
+    #     g_predictor.set_input(input_data, 0)
+    # else:
+    #     input_tensor = g_predictor.get_input(0)
+    #     fpga_preprocess(frame, input_tensor, g_model_config)
+    input_tensor = g_predictor.get_input(0)
+    fpga_preprocess(frame, input_tensor, g_model_config)
  
     if g_model_config.is_yolo:
         feed_shape = np.zeros((1, 2), dtype=np.int32)
@@ -84,12 +85,23 @@ def predict(frame, timer):
 
         shape_tensor = g_predictor.set_input(feed_shape, 1)
 
+    # global IS_FIRST_RUN
+    # if IS_FIRST_RUN:
+    #     IS_FIRST_RUN = False
+    #     g_predictor.run()
+    # else:
+    #     if timer:
+    #         timer.Continue()
+    #     g_predictor.run()
+    #     if timer:
+    #         timer.Pause()
 
     g_predictor.run()
+
     outputs = np.array(g_predictor.get_output(0))
+
+
     
-    #np.set_printoptions(2)
-    #print(outputs)
 
     res = list()
     if outputs.shape[1] == 6:
@@ -227,6 +239,7 @@ if __name__ == "__main__":
     mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_WIDTH, 320]) 
     mmap('set',caps,arg=[cv2.CAP_PROP_FRAME_HEIGHT,320])
     
+    
 
     ret = predictorInit()
     if ret != 0:
@@ -248,10 +261,15 @@ if __name__ == "__main__":
             _,frame=caps[read_cap].read()
             print('read')
             frame=cv2.resize(frame,(160,160))
+            w=h=160
             origin_frame = frame.copy()
 
-            predict_result = predict(origin_frame, timer)
-            print('predict')
+            predict_result = predict(origin_frame ,g_model_config,g_predictor)
+            #predict_result.sort(key=lambda x:x[1])
+            #print(predict_result)
+#            for _result in predict_result:
+#                k,xs=_result
+#                print(k,int(xs-w/2),sep='- ',end=' :: ')
 
             # if g_system_config.predict_log_enable:
             #     printResults(origin_frame, predict_result)

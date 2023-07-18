@@ -9,49 +9,53 @@ from pprint import pprint
 from threading import Thread
 from pysl import Config,truepath,mute_all
 
-from mask2angle4 import core
+from votex_angle import core_votex
+from mask2angle4 import core 
 
 if os.name!='nt':
     from utils import Serial_init,Fplog
-    from utils import Timeit,Timety,Timer
+    from utils import Timety,Timer
     from utils import ser_read,quene_get,order_respone,post_data
     from utils import getime,sprint,set_all_gpio,mmap,check_cap,display_angle
     from detection import detection_init,predict,drawResults
 
 def run(Q_order,cfg,open=False,switch_init=None):
 
-    h,w=map(int,cfg['input_frame_size'])
-    assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
-    
-    item_index=cfg['item_index']
-    
-  
-    serial_host,serial_bps=cfg['serial_host'],cfg['serial_bps']
-    ser=Serial_init(serial_host,serial_bps,0.5)
-
     log_dir='log/'+getime()
     assert 'main.py' in os.listdir() , 'work directory is not correct :{os.getcwd()}'
     os.mkdir(log_dir)
-
+    
     #logger_gpio    =Fplog(os.path.join(log_dir,'gpio.txt'))         # gpio输出
     logger_results =Fplog(os.path.join(log_dir,'results.txt'))      # 预测结果输出
     logger_looptime=Fplog(os.path.join(log_dir,'looptime.txt'))     # 循环计时
     logger_modelrun=Fplog(os.path.join(log_dir,'modelrun.txt'))     # 模型运行
     logger_list=[logger_results,logger_looptime,logger_modelrun]
+    
+    # configs
+    h,w=map(int,cfg['input_frame_size'])
+    assert not (h%32+w%32) , 'input_frame_size must be multiple of 32'
+    
+    
+    serial_host,serial_bps=cfg['serial_host'],cfg['serial_bps']
+    ser=Serial_init(serial_host,serial_bps,0.5)
+    
+    item_index=cfg['item_index']
+    item_offet=-15
+    target_index=cfg['spray_index']
+    target_offset=0
+
 
     try:
         T=time.time() # 总计时
-        timeit=Timeit('Initialization') # 开始初始化
         
         cap1 = cv2.VideoCapture(cfg['videos'][0],cv2.CAP_V4L) # 前摄像头
         cap2 = cv2.VideoCapture(cfg['videos'][1],cv2.CAP_V4L) # 边摄像头
-        #cap3 = cv2.VideoCapture('/dev/video2',cv2.CAP_V4L) # 右摄像头
-        caplist=[cap1,cap2]#cap2,cap3]
-        mmap('set',[cap1],arg=[cv2.CAP_PROP_FRAME_WIDTH, 160]) # 设置视频流大小
-        mmap('set',[cap1],arg=[cv2.CAP_PROP_FRAME_HEIGHT,160])
-        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_WIDTH, 160]) # 设置视频流大小
-        mmap('set',[cap2],arg=[cv2.CAP_PROP_FRAME_HEIGHT,160])
+        #cap3 = cv2.VideoCapture(cfg['videos'][2],cv2.CAP_V4L) # 右摄像头
+        caplist=[cap1,cap2]
+        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_WIDTH, w]) # 设置视频流大小
+        mmap('set',caplist,arg=[cv2.CAP_PROP_FRAME_HEIGHT,h])
         #cap1.set(int(cap1.get(cv2.CAP_PROP_FOURCC)), cv2.VideoWriter_fourcc(*'MJPG'))
+        check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
 
         global MODEL_CONFIG,PREDICTOR,DISPLAYER # 初始化检测器
         DISPLAYER,MODEL_CONFIG,PREDICTOR=detection_init(cfg['model_json'])
@@ -75,7 +79,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
         # [0 1 5 6 11 12]
         
         group_down=     [0,1,5   ,6,10,12,13]
-        down_label_left=[1,3,9999,1,1, 1,  3]
+        down_label_left=[1,3,9999,1,1, 1, 9999]
         building_left=[1,1,1]
         # group_up=[2,3,4,7,8,9,11]
         group_map={
@@ -110,7 +114,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
             return result #mmap('unpack',result,arg=[MODEL_CONFIG.labels])
 
         #@Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # 图像分割
-        def SegmentationRoad(cap,display=False):
+        def SegmentationRoad(cap,display=False,mode_vside=False):
             _,frame=cap.read()
             frame=cv2.resize(frame,(640,480))
             nonlocal predict_frame
@@ -118,17 +122,17 @@ def run(Q_order,cfg,open=False,switch_init=None):
             nonlocal order
             order_respone(order,frame=frame)
             with mute_all():
-                angle=core(frame)
+                if mode_vside:
+                    angle=core_votex(frame)
+                else:
+                    angle=core(frame)
             if display:
                 frame=display_angle(frame,angle)
                 DISPLAYER.putFrame(frame)
             return round(-angle),predict_frame
-        
 
-        timeit.out('Mainloop',logger=logger_modelrun,T=T) # 开始主循环
-
-        timer_predict=Timer(1) # 最多1s识别一次
-        timer_vortex=Timer(3) # 环岛最多3s一次
+        timer_predict=Timer(0.8) # 最多1s识别一次
+        timer_vortex=Timer(5) # 环岛最多5s一次
 
         Start=False # 运行标志
         switch=False # 摄像头切换
@@ -136,17 +140,33 @@ def run(Q_order,cfg,open=False,switch_init=None):
         if switch_init:
             switch=True
             switch_content=switch_init
+            
         vortex_seek=0
-        vortex_time=0
+        vortex_side_mode=False
         green_cnt=0  
-            
-        check_cap(caplist,T=T,logger=logger_modelrun) # 检测摄像头状态
+        vortex_time=0
+        fixed_angle=None  # - ->  + <-
+        
+    
+        st_time=50
+        rt_time_low=40
+        rt_time_high=15
+        
+        rt_rota_low=-20
+        rt_rota_high=-40
+        
+        v1_time=st_time+rt_time_low
+        v2_time=rt_time_high+rt_time_low
+        v3_time=rt_time_high
+        
+        
         while True:
-            
+            #print(ser.main_engine.out_waiting)
             #############
             order=quene_get(Q_order)
+            ser_read(ser)
             
-            if not (Start or 'start' in ser_read(ser) or order=='run' or len(sys.argv)==2 or open):
+            if not (Start or order=='run' or len(sys.argv)==2 or open):
                 continue
             else:
                 #Thread(target=SegmentationRoad,args=[cap1]).start()
@@ -161,23 +181,40 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if Start:
 
                 ################################## Segmentation
-                if not vortex_time:
-                    line_err,predict_frame=SegmentationRoad(cap1)
-                    sprint(f'[:{line_err:.0f}/]',T=T,ser=ser,logger=None,normal=False)
+                if fixed_angle==None:
+                    line_err,predict_frame=SegmentationRoad(cap1,mode_vside=vortex_side_mode)
+                    sprint(f'[:{line_err:.0f}/]',T=T,ser=ser,logger=None,normal=False) 
+                else:
+                    line_err,predict_frame=SegmentationRoad(cap1,mode_vside=vortex_side_mode)
+                    sprint(f'[:{fixed_angle:.0f}/]',T=T,ser=ser,logger=None,normal=False) 
+                    fixed_angle=None
+
+                if vortex_time:
+                    print(vortex_time)
+                    vortex_time-=1
+                    if vortex_seek==1:
+                        if vortex_time>st_time:
+                            pass
+                        else:
+                            fixed_angle=rt_rota_low
+                            if vortex_time==0:
+                                vortex_side_mode=False
+                                
+                    elif vortex_seek==2:
+                        if vortex_time>rt_time_high:
+                            fixed_angle=rt_rota_high
+                        else:
+                            fixed_angle=rt_rota_low
+                                
+                    elif vortex_seek==3:
+                        fixed_angle=rt_rota_high
+                        vortex_side_mode=True    
                 
-                #sprint(str(line_err) + ('->' if line_err<0 else '<-'),
-                #       T=T,ser=None,logger=logger_results,end='\n\r')
-                
-                # post_data(cfg.server,f'S{line_info}')
-                #ser.Send_data( '[:30\]'.encode('utf8'))
-                #continue
-             
             if timer_predict.T():   
                 
                 ################################## Detection
                 if not switch:
                     results=PredictFrame(frame=predict_frame)
-                    #continue
                     result_from='cap1'
                     if results:
                       kind,_=results[0]
@@ -193,42 +230,40 @@ def run(Q_order,cfg,open=False,switch_init=None):
                               print(f'Detetion switch {classes[kind]}')
                               ser_read(ser) # flush input
                               tmp_T=timer_predict.sep
+                              
                               if kind==1:
                                   time.sleep(2)
+                              if not down_label_left[1]:
+                                  vortex_side_mode=True
                               
                           elif kind==13 or vortex_time:
-                              
-                              if timer_vortex.T() and down_label_left[group_down.index(kind)]:
+                              if timer_vortex.T():
                                   vortex_seek+=1
-                                  print(f'Seek vortex at {vortex_seek} time')
+                                  print('Note:Seek vortex')
                                   if vortex_seek==1:
-                                      vortex_time==10000
-                                      print('vortex_time start')
+                                      print('vortex_time start 1')
+                                      vortex_side_mode=True
+                                      vortex_time=v1_time
                                   elif vortex_seek==2:
-                                      pass
+                                      print('vortex_time start 2')
+                                      # vortex_side_mode=True
+                                      vortex_time=v2_time
                                   elif vortex_seek==3:
-                                      vortex_time==20
-                              else:
-                                  vortex_time-=1
-                                  if vortex_seek<=2:
-                                      if vortex_seek>=9900:
-                                          print('line',end=' ')
-                                          sprint(f'[:0/]',T=T,ser=ser,logger=None,normal=True)
-                                      else:
-                                          print('round',end=' ')
-                                          sprint(f'[:40/]',T=T,ser=ser,logger=None,normal=True)
-                                  elif vortex_seek==3:
-                                      vortex_time=0
-                                      print('vortex_time end')
-                                      sprint(f'[:40/]',T=T,ser=ser,logger=None,normal=True)
-                              
+                                      print('vortex_time start 3')
+                                      # vortex_side_mode=True
+                                      vortex_time=v3_time
+
+        
+
                           
+                            
                 else:
                     timer_predict.sep=0
                     
                     results=PredictFrame(cap2)
                     result_from='cap2'
                     results=[row for row in results if row[0] in group_map[switch_content]]
+                    results.sort(key=lambda x:x[1])
                     print(results)
                     
                     if results or put_flag:
@@ -246,44 +281,42 @@ def run(Q_order,cfg,open=False,switch_init=None):
   
                       elif switch_content==10: # items
                             target_kind=classes.index(cfg['items_kind'])
-
-                            results.sort(key=lambda x:x[-1])
+                            
                             results=results[:3]
 
                             items=[_ for _ in group_map[switch_content]]
                             for index,result in enumerate(results):
                                 kind,_=result
                                 if kind in items:
-                                    
                                     items.remove(kind)
                                 else:
                                     okind,rkind=results[index][0],items.pop(0)
                                     results[index][0]=rkind
 
                                     print(f'auto replace: {classes[okind]} -> {classes[rkind]}')
-                            print(results)
                             
                             sum_cx=0
-                            target_flag=False
+                            target_item_flag=False
                             for index,result in enumerate(results):
                                 kind,cx=result
                                 sum_cx+=cx
                                 if target_kind==kind:
-                                    err=(cx-3)-w/2
-                                    target_flag=True
+                                    err=(cx+item_offet)-w/2
+                                    target_item_flag=True
                             
                             
                             avg_cx=sum_cx/len(results) if len(results) else w/2
                             center_err=avg_cx-w/2
                             
-                            if not target_flag:
+                            if not target_item_flag:
                                 err=3
                             else:
-                                err=err if abs(err)>3 else 0
+                                err=err/abs(err)*3 if abs(err)>=2 else 0
                                 
                             if not put_flag:
-                                center_err=center_err if abs(center_err)>20 else 0
+                                center_err=666
                             else:
+                                results=[result for result in results if result[0]!=target_kind]
                                 if item_index==2:
                                     if len(results)==0:
                                         center_err=-3
@@ -304,24 +337,35 @@ def run(Q_order,cfg,open=False,switch_init=None):
                             sprint(f'[&{err:.0f}:{center_err:.0f}/]',T=T,ser=ser,logger=None)
   
                       elif switch_content==12: # spray
-                          target_index=cfg['spray_index']
+                          
+                          results=results[:3]
+                          
                           spray_cx=[]
-                          results.sort(key=lambda x:x[1])
+                          
                           for result in results:
                               _,cx=result
                               spray_cx.append(cx)
-                          spray_cx.sort()
+                          spray_cx.sort(reverse=True)
                           print(f'Spray {spray_cx}')
-                          if len(spray_cx)!=3:
-                              print(f'Warning spray num = {len(spray_cx)} instead of 3')
-                          if len(spray_cx)<2:
+
+                          if len(spray_cx)<=2:
                               print(f'Warning spray num = {len(spray_cx)} contiune')
-                          
-                          target_index=target_index if target_index<=1 else -1 # 0 1 -1
-                          target_cx=spray_cx[target_index]
-                          err=w/2-target_cx
-                          err=err if abs(err)>20 else 0
-                          print(f'Spray [*{err:.0f}/]')
+                              
+                          #  target 0   100 50 10
+                              
+                          if len(spray_cx)==3:
+                              err=w/2-spray_cx[target_index]+target_offset
+                          elif 0<len(spray_cx)<=2:
+                              if target_index==0:
+                                  err=w/2-spray_cx[0]+target_offset
+                              elif target_index==2:
+                                  err=w/2-spray_cx[-1]+target_offset
+                              elif target_index==1:
+                                  err=w/2-sum(spray_cx)/len(spray_cx)+target_offset
+                          elif len(spray_cx)==0:
+                              print('Spray not found')
+                                  
+                          err=err if abs(err)>5 else 0
                           sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
                           pass
 
@@ -339,13 +383,9 @@ def run(Q_order,cfg,open=False,switch_init=None):
             if T-time.time()>(10*60): # 防死机
                 raise TimeoutError
 
-            # if timer_loop.T():
-            #     sprint('loop_times: {} takes {:.2f} s'.format(loop_times,time.time()-t),
-            #             T=T,ser=None,logger=logger_looptime)
             # set_all_gpio('111111',normal=False,ser=None,logger=logger_gpio) # low speed
 
     except:
-        timeit.out('end',logger=logger_modelrun,T=T)
         logger_results.add('{:.2f} : Error raised'.format(time.time()-T))
         logger_results.add(traceback.format_exc())
         print('Error main.py returned ')

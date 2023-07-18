@@ -67,12 +67,14 @@ def draw_rotate(img,center,rotate,color,thick=2,length=50):
     p2=int(midx+length*sin(rotate/180*pi)),int(midy-length*cos(rotate/180*pi))
     cv2.line(img,p2,p1,color,thick)
 
-def core(img=None,file=None,show=False,debug=False):
+def core_votex(img=None,file=None,show=False,debug=False):
     assert file or isinstance(img,np.ndarray)
     if file:
         img = cv2.imread(file)
     b, g, r = cv2.split(img)
     img = cv2.merge([b,g,r])
+    img[:,-160:]=[0,0,0]
+    img[:,-75:-50]=[0,255,0]
     
     img_=img.copy()
     hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -211,7 +213,10 @@ def core(img=None,file=None,show=False,debug=False):
         if cl and cr:
             cxavg_half=(width-hr/cr)-hl/cl
             cxavg_half-=20                       ##^^^^^^^
-
+            printf(f'half: {cxavg_half:.0f}')
+    
+            
+        printf(f'cxavg: {cxavg:.0f}')
      
     
         if not has_left and not has_right:
@@ -222,17 +227,19 @@ def core(img=None,file=None,show=False,debug=False):
                 has_right=True
                 
         k=areas/sum(areas)      
-        rotate=sum(rotates*k)    
-
+        rotate=sum(rotates*k)   
+        if rotate>0:
+            rotate*=2
+        printf(f'rotate {rotate:.0f}')
         if not has_left:
-            rotate-=(width-cxavg)/320*30      /1
+            rotate-=7
             mode=1
         elif not has_right:
             rotate+=(width/2-cxavg)/320*30    /1.5
             mode=2
         else:
             # printf(rotate,1)
-            rotate=rotate-(cxavg_half)/10-3 #*(box_num/4)
+            rotate=rotate-(cxavg_half)/10 #*(box_num/4)
             # printf(rotate,2) 
             mode=3
             
@@ -244,7 +251,13 @@ def core(img=None,file=None,show=False,debug=False):
         target_rotate=None
         mode=4
 
-    #print('box_num',box_num)
+        
+    printf(f'mode {mode}')
+    printf(f'res {rotate:.0f} '+('->' if rotate>0 else '<-'))
+    
+
+
+    printf('\n')
     if debug:
       return img_
     if mode!=2:
@@ -266,12 +279,35 @@ if __name__ == '__main__':
     # r=core(file=file,show=True)
     # printf(f'A {r:.0f} '+('->' if r>0 else '<-'))
     
-    cap=cv2.VideoCapture('../NewVideo/3.avi')
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    skip_frames = int(22 * fps)
-    cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
-    while 1:
-        _,frame=cap.read()
-        r=core(img=frame,show=True)
-        printf(f'A {r:.0f} '+('->' if r>0 else '<-'))
+#    cap=cv2.VideoCapture('../NewVideo/3.avi')
+#    fps = cap.get(cv2.CAP_PROP_FPS)
+#    skip_frames = int(22 * fps)
+#    cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
+#    while 1:
+#        _,frame=cap.read()
+#        r=core(img=frame,show=True)
+#        printf(f'A {r:.0f} '+('->' if r>0 else '<-'))
     
+#    from utils import Serial_init
+#    ser=Serial_init('/dev/ttyUSB0',115200,0.5)
+#    
+#    
+#    cap=cv2.VideoCapture('/dev/video1',cv2.CAP_V4L)
+#    while 1:
+#        _,frame=cap.read()
+#        r=core(img=frame,show=False)
+#        ser.main_engine.write(f'[:{-r:.0f}/]'.encode('utf8'))
+#        #printf(f'A {r:.0f} '+('->' if r>0 else '<-'))
+#        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

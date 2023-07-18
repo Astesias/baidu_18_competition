@@ -44,6 +44,14 @@ class Timer():
         else:
             return False
         
+class tmp_timer():
+    def __init__(self,t):
+        self.start=time.time()
+        self.t=t
+    def __call__(self):
+        return time.time()-self.start>self.t
+            
+        
 def SysInput(func,default,**kw):
     sprint(sys.argv,**kw)
     if len(sys.argv)>=1:
@@ -83,7 +91,7 @@ def Timety(timer=None,**kwo):
 
 def sprint(message='',ser=None,logger=None,normal=True,T=0,end='\n',sep=' '):
     if ser:
-        ser.Send_data( (message+end).encode('utf8'))
+        ser.Send_data( (message).encode('utf8'))
     if logger:
         logger.add('[{:.2f}s] : {}'.format(time.time()-T,message))
     if normal:
@@ -154,10 +162,10 @@ class Communication():
                 Ret = True
         except Exception as e:
             print(e)
-        self.Print_Name()
+        #self.Print_Name()
 
     def Print_Name(self):
-        print('Serial Configs:')
+        print('\nSerial Configs:')
         print('    name:',self.main_engine.name)
         print('    port:',self.main_engine.port)
         print('    baudrate:',self.main_engine.baudrate)
@@ -170,6 +178,7 @@ class Communication():
         print('    rtscts:',self.main_engine.rtscts)
         print('    dsrdtr:',self.main_engine.dsrdtr)
         print('    interCharTimeout:',self.main_engine.interCharTimeout)
+        print()
 
     def Open_Engine(self):
         self.main_engine.open()
@@ -190,6 +199,7 @@ class Communication():
         return self.main_engine.readline()
 
     def Send_data(self,data):
+        #self.main_engine.reset_output_buffer()
         self.main_engine.write(data)
 
     def Recive_data(self,way):
@@ -216,7 +226,7 @@ class Communication():
             except Exception as e:
                 print(e)
 
-def Serial_init(com="/dev/ttyPS1",bps=115200,timeout=0.5,**kw):
+def Serial_init(com="/dev/ttyUSB0",bps=115200,timeout=0.5,**kw):
     return Communication(com,bps,timeout,**kw)
 
 # useless
@@ -281,16 +291,14 @@ def check_cap(capl,**kw):
 ############################################## communicate
 
 def ser_read(ser):
-    try:
-      if ser.main_engine.inWaiting():
-        s=str(ser.Read_Line(),'utf8').strip('\r\n')
+    if ser.main_engine.inWaiting():
+      #s=str(ser.Read_Line(),'utf8').strip('\r\n').strip(' ')
+      #s=str(ser.main_engine.read_all(),'utf8').strip(' \r\n').strip(' ')
+      s=str(ser.main_engine.read_all(),'utf8').replace('\r','').replace('\n','\\n').strip(' ')
+      if s:
         print(f'serial recv {s}')
-        return s
-      else:
-        return ''
-    except:
-      ser.main_engine.flushInput() 
-      ser.main_engine.flushOutput() 
+      return s
+    else:
       return ''
 
 def quene_get(Q):
@@ -300,7 +308,7 @@ def quene_get(Q):
 def order_respone(order,frame):
 
     if order=='update':
-      from mask2angle3 import core
+      from mask2angle4 import core
       frame=core(frame,debug=True)
       cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
 

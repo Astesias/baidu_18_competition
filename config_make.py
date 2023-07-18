@@ -4,15 +4,15 @@ from pysl import Config, getip
 def make_cfg():
     config = {
         'port': 8080,
-        'serial_host': "/dev/ttyUSB0" if 1 else "/dev/ttyPS0",
+        'serial_host': "/dev/ttyUSB0",
         'serial_bps': 115200,
         'model_dir': os.path.abspath('./dete_model'),
         'model_json': 'usb.json',
-        'input_frame_size': (96, 96),
+        'input_frame_size': (320,320),
         'server_task': './test/dj/mysite/manage.py',
         'main_task': './Baidu_18_ysl/main.py',
-        'spray_index': 2,  # [0,1,2]
-        'items_kind': 'item2', # [item1,item2,item3]
+        'spray_index': 0,  # [0,1,2]
+        'items_kind': 'item1', # [item1,item2,item3]
         'item_index': 0  # [0,1,2]
     }
 
@@ -55,8 +55,8 @@ def make_cfg():
                 break
           if not usbflag:
             print("Warning usbserial not found")
-            if config['serial_host']=="/dev/ttyPS0":
-              print('Warning Using ttyPS0 instead')
+            config['serial_host']="/dev/ttyPS0"
+            print('Warning Using ttyPS0 instead')
                 
      
 
