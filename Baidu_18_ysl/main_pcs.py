@@ -125,8 +125,12 @@ def run(Q_order, cfg, open=False, switch_init=None):
                 try:
                     while 1:
                         if Qi.qsize():
+                            msg=Qi.get()
+                            if msg=='break':
+                                sys.exit(0)
+                                break
                             pause = not pause
-                            Qi.get()
+                            
                             while Qo.qsize():
                                 Qo.get()
                             
@@ -145,6 +149,10 @@ def run(Q_order, cfg, open=False, switch_init=None):
                 except:
                     import traceback
                     print((traceback.format_exc()))
+                    sys.exit(0)
+                    break
+                
+            
 
         # @Timety(timer=None,ser=None,logger=logger_modelrun,T=T) # Í¼Ïñ·Ö¸î
         def SegmentationRoad(cap, display=False, mode_vside=False):
@@ -224,11 +232,17 @@ def run(Q_order, cfg, open=False, switch_init=None):
         sprint('Note: Success Start!!!',T=T)
         sprint('Note: beep for opening!!',T=T)
         sprint(beep_msg,T=T, ser=ser,normal=False)
+                 
         while True:
-
+            
             #print(ser.main_engine.out_waiting,ser.main_engine.in_waiting)
             #############
             order = quene_get(Q_order)
+            msg = ser_read(ser)
+            
+            if msg=='exit':
+                Qi.put('break')
+                sys.exit(0)
             
             if not (Start or order == 'run' or len(sys.argv) == 2 or open):
                     continue
@@ -473,7 +487,6 @@ def run(Q_order, cfg, open=False, switch_init=None):
                         sprint(f'[*{err:.0f}/]', T=T, ser=ser, logger=None)
                         pass
 
-                msg = ser_read(ser)
                 if 'done' in msg:
                     switch = not switch
                     Qi.put('resume')
