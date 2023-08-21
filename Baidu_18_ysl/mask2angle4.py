@@ -148,8 +148,9 @@ def core(img=None,file=None,show=False,debug=False):
                 #     cv2.drawContours(img, [contour], -1, (102, 204, 255), 2)
                 #     continue
                 if  w>h:
-                    cv2.drawContours(img, [contour], -1, (102, 204, 255), 2)
+                    cv2.drawContours(img, [contour], -1, (0, 0, 0), 2)
                     continue
+                    pass
 
               
            
@@ -215,6 +216,7 @@ def core(img=None,file=None,show=False,debug=False):
      
     
         if not has_left and not has_right:
+
             cxavg=sum(all_cxes)/len(all_cxes) if all_cxes else 0
             if cxavg<width/2:
                 has_left=True
@@ -248,9 +250,10 @@ def core(img=None,file=None,show=False,debug=False):
     if debug:
       return img_
     if mode!=2:
-      return rotate/1.4
+      rotate= rotate/1.4
     else:
-      return rotate/1.2
+      rotate= rotate/1.2
+    return rotate
 
 
     

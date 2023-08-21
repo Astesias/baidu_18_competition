@@ -38,7 +38,7 @@ def main_tasker(Q_Order):
     from pysl import getime
 
     while 1:
-        n='/dev/video0'
+        n='/dev/video1'
         path=f'./output/{getime(1)}.avi'
 
         cap=cv2.VideoCapture(n,cv2.CAP_V4L)     

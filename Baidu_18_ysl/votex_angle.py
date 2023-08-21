@@ -21,7 +21,7 @@ cut_piece=height//piece
 
 window_size = 4
 previous_outputs = [0,0,0,0]
-lower_thd,higher_thd=np.array([40,50,50]),np.array([90,255,255])
+lower_thd,higher_thd=np.array([0,50,50]),np.array([100,255,255])
 
 display=True
 display_mode=3

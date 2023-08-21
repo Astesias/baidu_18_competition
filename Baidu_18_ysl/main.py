@@ -365,7 +365,7 @@ def run(Q_order,cfg,open=False,switch_init=None):
                           elif len(spray_cx)==0:
                               print('Spray not found')
                                   
-                          err=err if abs(err)>5 else 0
+                          err=err if abs(err)>3 else 0
                           sprint(f'[*{err:.0f}/]',T=T,ser=ser,logger=None)
                           pass
 

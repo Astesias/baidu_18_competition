@@ -21,7 +21,7 @@ class PredictResult(object):
         return [classes[self.type],self.x,self.y,self.width,self.height]
 
 def predict_result(type_, score, x, y, width, height):
-    return [int(type_),int(x)+int(width/2)] #int(x),int(y),int(width),int(height)
+    return [int(type_),int(x)+int(width/2),int(y)+int(height/2),round(score,2)]#,int(y),int(width),int(height)
 
 
 def predictorInit(g_model_config,g_predictor):

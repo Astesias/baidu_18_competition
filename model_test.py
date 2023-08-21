@@ -152,11 +152,11 @@ def boundaryCorrection(predict_result, width_range, height_range):
 def drawResults(frame, results):
     """draw result"""
     frame_shape = frame.shape
-    for r in results:
+    for r in results[:]:
         r = boundaryCorrection(r, frame_shape[1], frame_shape[0])
         if r.type >= 0 and r.type < len(g_model_config.labels):
             origin = (r.x, r.y+20)
-            label_name = g_model_config.labels[r.type]
+            label_name = g_model_config.labels[r.type].replace('item',str(round(r.score,2))+' '  )
             cv2.putText(frame, label_name.replace('building_',''), 
                         origin, cv2.FONT_HERSHEY_SIMPLEX, 0.5,(255, 255, 224) , 1)
             cv2.rectangle(frame, (r.x, r.y), (r.x + r.width, r.y + r.height), (0, 0, 224),1)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                     
             _,frame=caps[read_cap].read()
             print('read')
-            frame=cv2.resize(frame,(160,160))
+            frame=cv2.resize(frame,(320,320))
             w=h=160
             origin_frame = frame.copy()
 

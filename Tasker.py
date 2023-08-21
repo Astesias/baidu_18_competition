@@ -43,7 +43,7 @@ def main_tasker(Q_Order,cfg):
     os.chdir('./Baidu_18_ysl')
     sys.path.insert(0,'./')
     from main_pcs import run
-    task=[]
+    task=[]  # 12 label 10 trade
     print('Note: Start with Tasker.py , main project use main_pcs.py')
     print('Note: Tasker with task',(*task,) if task else 'None')
     run(Q_Order,cfg,True,*task)
@@ -57,14 +57,38 @@ def data_poster(server):
                      header={"Content-type": "application/json"})
         n+=1
 
+def fin_msg(Q_Order):
+    while 1:
+        time.sleep(1)
+        with open('MSG.txt','r') as fp:
+            msg=fp.read()
+        if msg:
+            open('MSG.txt','w')
+            Q_Order.put(msg)
+        
 
 
 if __name__=='__main__':
-    if len(sys.argv)!=2:
+    usb_flag=False
+    for i in os.listdir('/dev'):
+        if 'USB' in i:
+            usb_flag=True
+    assert usb_flag,'Error , TTYUSB not found'
+    if len(sys.argv)==2 and int(sys.argv[1])==1:
         pcs(target=server_tasker,args=[server,port]).start()
         pcs(target=get_order,args=[Q_Order,server]).start()
+        
+    if len(sys.argv)==2 and int(sys.argv[1])==2:
+        pcs(target=fin_msg,args=[Q_Order]).start()
 
     if os.name!='nt':
         pcs(target=main_tasker,args=[Q_Order,cfg]).start()
     else:
         pcs(target=data_poster,args=[server]).start()
+        
+        
+        
+        
+        
+        
+        

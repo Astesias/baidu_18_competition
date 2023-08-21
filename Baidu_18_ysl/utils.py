@@ -89,9 +89,20 @@ def Timety(timer=None,**kwo):
         return wrapper
     return _timety
 
-def sprint(message='',ser=None,logger=None,normal=True,T=0,end='\n',sep=' '):
+def sprint(message='',ser=None,logger=None,normal=True,T=0,end='\n',sep=' ',mute=False):
     if ser:
         ser.Send_data( (message).encode('utf8'))
+        if mute:
+            time.sleep(0.1)
+            for i in range(3):
+              ser.Send_data( (message).encode('utf8'))
+            time.sleep(0.1)
+            for i in range(3):
+              ser.Send_data( (message).encode('utf8'))
+            time.sleep(0.1)
+            for i in range(3):
+              ser.Send_data( (message).encode('utf8'))
+            
     if logger:
         logger.add('[{:.2f}s] : {}'.format(time.time()-T,message))
     if normal:
@@ -156,12 +167,14 @@ class Communication():
         self.timeout =timeout
 
         global Ret
-        try:
-            self.main_engine= serial.Serial(self.port,self.bps,timeout=self.timeout)
-            if (self.main_engine.is_open):
-                Ret = True
-        except Exception as e:
-            print(e)
+        
+
+        self.main_engine= serial.Serial(self.port,self.bps,timeout=self.timeout)
+        assert self.main_engine.is_open,'usbserial init failed'
+        if (self.main_engine.is_open):
+            Ret = True
+
+            
         #self.Print_Name()
 
     def Print_Name(self):
@@ -308,7 +321,7 @@ def quene_get(Q):
 def order_respone(order,frame):
 
     if order=='update':
-      from mask2angle4 import core
+      from mask2angle5 import core
       frame=core(frame,debug=True)
       cv2.imwrite('../test/dj/mysite/static/img/tmp.jpg',frame)
 
